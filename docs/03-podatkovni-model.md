@@ -116,7 +116,8 @@ Datumi in časi so shranjeni kot besedilo v obliki ISO 8601 (`2026-11-13`, `2026
 - `datum_od` ne sme biti po `datum_do` (omejitev `CHECK` v bazi).
 - Prekrivanja terminov ni mogoče izraziti s preprosto omejitvijo v bazi. Preverja ga backend v isti transakciji, v kateri shrani rezervacijo (glej 04, ADR 0006).
 - Brisanja ni tam, kjer bi izgubili zgodovino: kos se ne briše, ampak dobi stanje `ODPISAN`; uporabnik se ne briše, ampak se deaktivira; kategorije s kosi ni mogoče izbrisati.
-- Zamuda se ne shranjuje posebej. Izračuna se iz `datum_do`, `vrnjeno_ob` in današnjega datuma.
+- Razpoložljivost se ne shranjuje posebej. Termin zasedajo samo rezervacije v stanju `ODDANA`, `ODOBRENA` ali `PREVZETA`; ko stanje postane `VRNJENA`, je kos takoj prost od dneva vračila naprej.
+- Zamuda se ne shranjuje posebej. Sistem jo izračuna iz `datum_do` in datuma iz `vrnjeno_ob` (ali današnjega datuma, če kos še ni vrnjen) ter jo prikaže.
 
 ## Usklajenost z vlogami in procesom
 

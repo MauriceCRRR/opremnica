@@ -5,7 +5,8 @@
 - **Kos opreme** – en fizičen predmet z inventarno oznako, npr. FOTO-02. Ima stanje `UPORABEN`, `V_POPRAVILU` ali `ODPISAN`.
 - **Rezervacija** – zahteva enega uporabnika za en kos v enem terminu. Hrani tudi podatke o prevzemu in vračilu.
 - **Termin** – obdobje od datuma od do datuma do, v celih dneh; oba dneva sta vključena.
-- **Aktivna rezervacija** – rezervacija v stanju `ODDANA`, `ODOBRENA` ali `PREVZETA`. Samo aktivne rezervacije zasedajo termin.
+- **Aktivna rezervacija** – rezervacija v stanju `ODDANA`, `ODOBRENA` ali `PREVZETA`. Samo aktivne rezervacije zasedajo termin. Ko skrbnik evidentira vračilo, rezervacija ni več aktivna, zato so dan vračila in morebitni preostali dnevi termina takoj prosti.
+- **Zamuda** – kos ni vrnjen do vključno datuma do. Dnevi zamude = dan vračila (ali današnji dan, če kos še ni vrnjen) − datum do. Sistem jih izračuna in prikaže; posebej se ne shranjujejo.
 - **Prevzem** in **vračilo** – trenutek, ko skrbnik kos preda članu oziroma ga od člana sprejme, in to evidentira v sistemu.
 
 ## Uporabniške vloge
@@ -66,7 +67,7 @@ Kratek opis:
 3. **F03 Oddaja rezervacije s preverjanjem prekrivanja** – uporabnik rezervira prost kos; sistem zavrne prekrivanje z aktivno rezervacijo in neveljaven termin.
 4. **F04 Odobritev ali zavrnitev** – skrbnik oddano rezervacijo odobri ali jo z razlogom zavrne.
 5. **F05 Evidentiranje prevzema** – skrbnik zapiše, da je član kos prevzel; sistem preveri termin in da kos ni še pri drugem članu.
-6. **F06 Evidentiranje vračila in stanja kosa** – skrbnik zapiše vračilo, stanje kosa in morebitno zamudo; poškodovan kos označi kot `V_POPRAVILU`.
+6. **F06 Evidentiranje vračila in stanja kosa** – skrbnik zapiše vračilo in stanje kosa, sistem pa izračuna in prikaže morebitno zamudo; nepoškodovan kos je takoj spet prost, poškodovanega skrbnik označi kot `V_POPRAVILU`.
 7. **F07 Preklic rezervacije** – član prekliče svojo rezervacijo pred prevzemom; skrbnik lahko z razlogom prekliče odobreno rezervacijo.
 8. **F08 Moje rezervacije** – uporabnik vidi svoje aktivne in pretekle rezervacije, stanja in razloge zavrnitev.
 9. **F09 Upravljanje opreme in kategorij** – skrbnik dodaja in ureja kose in kategorije ter spreminja stanje kosa.
@@ -116,7 +117,7 @@ stateDiagram-v2
 - **Kos ni uporaben:** kos je `V_POPRAVILU` ali `ODPISAN`. Nove rezervacije in prevzem niso mogoči.
 - **Prevzem zunaj termina:** prevzem pred datumom od ali po datumu do ni mogoč. Neprevzeto rezervacijo skrbnik prekliče z razlogom »ni prevzeta v terminu«.
 - **Kos je še izposojen:** prejšnji član kosa še ni vrnil (njegova rezervacija je še `PREVZETA`). Prevzem za naslednjo rezervacijo ni mogoč, dokler vračilo ni evidentirano.
-- **Zamuda:** rezervacija je `PREVZETA`, datum do pa je že minil. Prikaže se med zamujenimi vračili (F11); pri vračilu se zapiše število dni zamude.
+- **Zamuda:** rezervacija je `PREVZETA`, datum do pa je že minil. Prikaže se med zamujenimi vračili (F11). Število dni zamude sistem izračuna iz datuma do in dneva vračila (ali današnjega dne) in ga prikaže; posebej se ne shranjuje.
 - **Poškodba:** pri vračilu skrbnik kos označi kot `V_POPRAVILU` in vpiše opombo. Sistem pokaže prihodnje aktivne rezervacije tega kosa, ki jih mora skrbnik zavrniti ali preklicati.
 - **Ponovljeno dejanje:** dvojna odobritev ali vračilo že vrnjene rezervacije se obravnava kot nedovoljen prehod.
 
@@ -124,11 +125,11 @@ stateDiagram-v2
 
 Predpostavke so delovne odločitve avtorja. Društvo kot naročnik jih še ni potrdilo.
 
-- **P1** Termin je v celih dneh, datum od in datum do sta vključena. Če član kos vrne 16. 11., ga drug član lahko rezervira šele od 17. 11.
+- **P1** Termin je v celih dneh, datum od in datum do sta vključena. Dve aktivni rezervaciji istega kosa ne smeta imeti skupnega dne: če se termin ene konča 16. 11., se naslednja lahko začne najprej 17. 11.
 - **P2** Rezervacija traja največ 14 dni.
 - **P3** Datum od ne sme biti v preteklosti in je lahko največ 60 dni od današnjega dne.
 - **P4** Ena rezervacija velja za en kos. Za več kosov uporabnik odda več rezervacij.
-- **P5** Termin zasedajo vse aktivne rezervacije, tudi še neodobrene. Kdor prej odda rezervacijo, ima prednost.
+- **P5** Termin zasedajo vse aktivne rezervacije, tudi še neodobrene. Kdor prej odda rezervacijo, ima prednost. Evidentirano vračilo kos takoj sprosti: rezervacija `VRNJENA` ni več aktivna, zato lahko drug član rezervira kos že od dneva vračila naprej, tudi pri predčasnem vračilu.
 - **P6** Prevzem je mogoč samo znotraj termina. Samodejnega preklica neprevzetih rezervacij ni.
 - **P7** Skrbnik lahko obdela tudi svojo rezervacijo; zapisano je, kdo je odločil.
 
