@@ -10,9 +10,23 @@
   <header id="glava"></header>
   <main>
     <h1>Rezervacije</h1>
-    <p class="podnaslov">Čakajoče rezervacije odobri ali z razlogom zavrni. Najstarejša je na vrhu.</p>
+    <p id="danes" class="podnaslov"></p>
 
     <p id="napaka" class="napaka" role="alert" hidden></p>
+    <p id="uspeh" class="uspeh" role="status" hidden></p>
+
+    <section id="prizadete" hidden>
+      <h2>Rezervacije kosa v popravilu</h2>
+      <div class="tabela">
+        <table>
+          <thead>
+            <tr><th>Član</th><th>Kos</th><th>Termin</th><th>Stanje</th><th>Dejanje</th></tr>
+          </thead>
+          <tbody id="prizadeteVrstice"></tbody>
+        </table>
+      </div>
+      <p class="opomba">Kos je šel v popravilo. Te rezervacije zavrni ali prekliči, da člani izvedo razlog.</p>
+    </section>
 
     <h2>Čakajoče</h2>
     <div class="tabela">
@@ -24,27 +38,48 @@
       </table>
     </div>
 
-    <h2>Odobrene in prevzete</h2>
+    <h2>Za prevzem</h2>
     <div class="tabela">
       <table>
         <thead>
-          <tr><th>Član</th><th>Kos</th><th>Termin</th><th>Namen</th><th>Stanje</th></tr>
+          <tr><th>Član</th><th>Kos</th><th>Termin</th><th>Namen</th><th>Dejanje</th></tr>
         </thead>
-        <tbody id="ostale"></tbody>
+        <tbody id="zaPrevzem"></tbody>
+      </table>
+    </div>
+
+    <h2>Izposojeno</h2>
+    <div class="tabela">
+      <table>
+        <thead>
+          <tr><th>Član</th><th>Kos</th><th>Vrniti do</th><th>Opozorilo</th><th>Dejanje</th></tr>
+        </thead>
+        <tbody id="izposojeno"></tbody>
+      </table>
+    </div>
+
+    <h2>Odobrene za pozneje</h2>
+    <div class="tabela">
+      <table>
+        <thead>
+          <tr><th>Član</th><th>Kos</th><th>Termin</th><th>Namen</th><th>Dejanje</th></tr>
+        </thead>
+        <tbody id="pozneje"></tbody>
       </table>
     </div>
   </main>
 
-  <dialog id="zavrnitev">
+  <!-- isto okno za zavrnitev oddane in preklic odobrene rezervacije -->
+  <dialog id="razlog">
     <form>
-      <h2>Zavrnitev rezervacije</h2>
+      <h2 id="razlogNaslov"></h2>
       <dl>
         <dt>Član</dt>
-        <dd id="zavrnitevClan"></dd>
+        <dd id="razlogClan"></dd>
         <dt>Kos</dt>
-        <dd id="zavrnitevKos"></dd>
+        <dd id="razlogKos"></dd>
         <dt>Termin</dt>
-        <dd id="zavrnitevTermin"></dd>
+        <dd id="razlogTermin"></dd>
       </dl>
       <label>Razlog (obvezno)
         <input name="razlog" maxlength="300" required>
@@ -52,7 +87,35 @@
       <p class="opomba">Razlog bo član videl v svojih rezervacijah.</p>
       <p class="napaka" role="alert" hidden></p>
       <div class="gumbi">
-        <button>Potrdi zavrnitev</button>
+        <button id="razlogPotrdi"></button>
+        <button type="button" class="drugi">Zapri</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="vracilo">
+    <form>
+      <h2>Vračilo opreme</h2>
+      <dl>
+        <dt>Član</dt>
+        <dd id="vraciloClan"></dd>
+        <dt>Kos</dt>
+        <dd id="vraciloKos"></dd>
+        <dt>Vrniti do</dt>
+        <dd id="vraciloRok"></dd>
+      </dl>
+      <fieldset>
+        <legend>Stanje kosa ob vračilu</legend>
+        <label class="izbira"><input type="radio" name="stanje_kosa" value="UPORABEN" checked> brez poškodb</label>
+        <label class="izbira"><input type="radio" name="stanje_kosa" value="V_POPRAVILU"> potrebuje popravilo</label>
+      </fieldset>
+      <label>Opomba
+        <input name="opomba" maxlength="300">
+      </label>
+      <p class="opomba">Pri »potrebuje popravilo« je opomba obvezna; kosa do popravila ni mogoče rezervirati.</p>
+      <p class="napaka" role="alert" hidden></p>
+      <div class="gumbi">
+        <button>Potrdi vračilo</button>
         <button type="button" class="drugi">Zapri</button>
       </div>
     </form>
