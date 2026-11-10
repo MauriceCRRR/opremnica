@@ -82,7 +82,7 @@ Trenutno je 34 testov (`node:test` in `supertest`). Preverjajo API proti sprejem
 
 ## Tehnologije
 
-- Frontend: HTML, CSS in JavaScript brez ogrodja in brez koraka gradnje
+- Frontend: HTML, CSS in JavaScript brez ogrodja in brez koraka gradnje; pisava Google Sans Flex (licenca OFL) je priložena v `frontend/fonts/`, zato aplikacija ne kliče zunanjih strežnikov
 - Backend: Node.js, Express 5, REST API z JSON; isti strežnik streže tudi frontend
 - Podatkovna baza: SQLite (`better-sqlite3`)
 - Avtentikacija: seja s piškotkom (`express-session`), gesla zgoščena s `scrypt` in naključno soljo
@@ -93,7 +93,7 @@ Trenutno je 34 testov (`node:test` in `supertest`). Preverjajo API proti sprejem
 
 - `backend/src/` – strežnik: `app.js` (seja, prijava, pravice), `oprema.js`, `rezervacije.js` in `uporabniki.js` (poti API), `baza.js` in `shema.sql` (SQLite), `zacetniPodatki.js` in `seed.js` (začetni podatki)
 - `backend/test/` – testi
-- `frontend/` – strani HTML z enim skupnim slogom (`slog.css`) in skupnimi funkcijami (`skupno.js`)
+- `frontend/` – strani HTML z enim skupnim slogom (`slog.css`) in skupnimi funkcijami (`skupno.js`); v `frontend/fonts/` sta pisava in njena licenca
 - `docs/` – zasnova, uporabniške zgodbe, wireframi in arhitekturne odločitve
 
 ## Dokumentacija
