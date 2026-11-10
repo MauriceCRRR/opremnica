@@ -1,4 +1,22 @@
 /* Opremnica – en slog za vse strani: bela podlaga, levi meni, tanke sive obrobe, svetlomodri poudarki */
+
+/* pisava je lokalna (mapa fonts, licenca OFL); druga datoteka prinese č, š, ž */
+@font-face {
+  font-family: 'Google Sans Flex';
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('fonts/GoogleSansFlex-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Google Sans Flex';
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('fonts/GoogleSansFlex-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 :root {
   --besedilo: #202124;
   --bledo: #5f6368;
@@ -23,7 +41,7 @@ body {
   grid-template-columns: 15rem minmax(0, 1fr);
   min-height: 100vh;
   margin: 0;
-  font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font: 16px/1.5 'Google Sans Flex', system-ui, sans-serif;
   color: var(--besedilo);
   background: #fff;
 }
@@ -64,7 +82,7 @@ body {
 }
 
 #glava a.tukaj {
-  font-weight: 600;
+  font-weight: 500;
   background: var(--modra-svetla);
 }
 
@@ -107,15 +125,17 @@ label {
   display: grid;
   gap: 0.35rem;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--bledo);
 }
 
-/* polje je v oznaki label, zato mu velikost pisave vrnemo na običajno */
+/* polje je v oznaki label, zato mu velikost pisave vrnemo na običajno;
+   ista višina za vsa polja, da so oznake nad njimi poravnane */
 input,
 select {
   width: 100%;
-  padding: 0.55rem 0.75rem;
+  height: 2.75rem;
+  padding: 0 0.75rem;
   font: inherit;
   font-size: 1rem;
   font-weight: 400;
@@ -125,6 +145,15 @@ select {
   border-radius: 8px;
 }
 
+/* izbirnik ostane domač, samo puščica je naša: odmaknjena od roba, besedilo ne seže vanjo */
+select {
+  padding-right: 2.75rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%235f6368' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+}
+
 input:focus,
 select:focus {
   border-color: var(--modra);
@@ -132,7 +161,8 @@ select:focus {
 }
 
 button {
-  padding: 0.55rem 1.25rem;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
   font: inherit;
   font-weight: 600;
   color: #fff;
@@ -199,17 +229,12 @@ td {
 
 th {
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--bledo);
 }
 
 tbody tr:last-child td {
   border-bottom: 0;
-}
-
-/* inventarna oznaka */
-code {
-  font: 0.9em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .opomba {
@@ -231,7 +256,7 @@ code {
   display: inline-block;
   padding: 0.15rem 0.7rem;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 500;
   color: #3c4043;
   white-space: nowrap;
   background: #f1f3f4;
