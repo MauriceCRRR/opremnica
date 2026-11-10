@@ -88,5 +88,27 @@ export function rezervacijePoti(baza, zdaj) {
     `).all());
   });
 
+  // id iz naslova; če ni število, je null in se ne ujame z nobeno rezervacijo
+  const idIz = (req) => (/^\d+$/.test(req.params.id) ? Number(req.params.id) : null);
+
+  // Preklic lastne rezervacije pred prevzemom. Pogoj na stanje je v samem UPDATE,
+  // zato se že prevzeta ali zaključena rezervacija ne spremeni.
+  poti.post('/rezervacije/:id/preklic', (req, res) => {
+    const id = idIz(req);
+    const rezervacija = baza.prepare('SELECT clan_id, stanje FROM rezervacija WHERE id = ?').get(id);
+    if (!rezervacija) return res.status(404).json({ napaka: 'Rezervacija ne obstaja' });
+    if (rezervacija.clan_id !== req.uporabnik.id) {
+      return res.status(403).json({ napaka: 'Prekličeš lahko samo svojo rezervacijo' });
+    }
+
+    const { changes } = baza.prepare(
+      "UPDATE rezervacija SET stanje = 'PREKLICANA' WHERE id = ? AND stanje IN ('ODDANA', 'ODOBRENA')",
+    ).run(id);
+    if (!changes) {
+      return res.status(409).json({ napaka: `Rezervacije v stanju ${rezervacija.stanje} ni mogoče preklicati` });
+    }
+    res.json({ stanje: 'PREKLICANA' });
+  });
+
   return poti;
 }

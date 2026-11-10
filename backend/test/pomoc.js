@@ -36,6 +36,15 @@ export function idUporabnika(baza, email) {
   return baza.prepare('SELECT id FROM uporabnik WHERE email = ?').pluck().get(email);
 }
 
+// rezervacija kosa iz začetnih podatkov (tam ima vsak kos največ eno)
+export function idRezervacije(baza, oznaka) {
+  return baza.prepare('SELECT id FROM rezervacija WHERE kos_id = ?').pluck().get(idKosa(baza, oznaka));
+}
+
+export function stanjeRezervacije(baza, id) {
+  return baza.prepare('SELECT stanje FROM rezervacija WHERE id = ?').pluck().get(id);
+}
+
 // rezervacijo vpiše naravnost v bazo, mimo pravil; privzeto Nikova za FOTO-02, 13.–16. 11.
 export function vstaviRezervacijo(baza, { oznaka = 'FOTO-02', email = NIK, od = '2026-11-13', datumDo = '2026-11-16', stanje = 'ODOBRENA', oddano = '2026-11-10T12:00:00' } = {}) {
   return Number(baza.prepare(`
