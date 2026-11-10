@@ -1,6 +1,6 @@
 # Opremnica
 
-Spletna rešitev za izposojo opreme v študentskem društvu. Član vidi, kdaj je kos opreme prost, in ga rezervira. Skrbnik opreme rezervacijo odobri ali zavrne ter evidentira prevzem in vračilo. Sistem ne dovoli dveh rezervacij istega kosa v prekrivajočem se terminu. Administrator upravlja uporabniške račune in vloge.
+Spletna rešitev za izposojo opreme v študentskem društvu. Član vidi, kdaj je kos opreme prost, in ga rezervira. Skrbnik opreme rezervacijo odobri ali zavrne ter evidentira prevzem in vračilo. Sistem ne dovoli dveh rezervacij istega kosa v prekrivajočem se terminu. Administrator vidi pregled uporabniških računov in vlog.
 
 Projekt pri predmetu Razvoj informacijskih rešitev in storitev (RIRS), UM FERI, 2026/27. Avtor: Maurice Čižič Rottner.
 

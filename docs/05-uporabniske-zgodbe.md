@@ -283,6 +283,6 @@ Frontend nima samodejnih testov v brskalniku. V brskalniku je bilo pregledano:
 - 10. 11. 2026, prvi sklop: napačno geslo, začetni zasloni vseh treh vlog, filter po kategoriji in terminu, sporočilo ob obrnjenih datumih, odjava;
 - 11. 11. 2026, drugi sklop: samodejna osvežitev seznama ob spremembi termina, rezervacija dveh kosov z oknom, ki pokaže pravi kos in termin, *Moje rezervacije*, seznam *Čakajoče*, odobritev, zavrnitev (brez razloga in s samimi presledki je ustavljena), prikaz razloga članu in preklic lastne rezervacije.
 
-Zasloni tretjega sklopa (prevzem, vračilo, seznam prizadetih rezervacij, skrbnikov preklic) v brskalniku še niso bili pregledani; preverjen je njihov API.
+11. 11. 2026 je bil v brskalniku pregledan tudi tretji sklop: prevzem je pravilno zavrnjen, dokler prejšnji član kosa ne vrne; po vračilu uspe. Vračilo z enodnevno zamudo jo pravilno izpiše. Pri poškodbi je prazna opomba zavrnjena, veljavno vračilo pa kos označi kot »V popravilu« in pokaže prizadeto prihodnjo rezervacijo. Skrbnik jo prekliče z obveznim razlogom, član vidi stanje in razlog, kos v popravilu pa nima gumba za novo rezervacijo.
 
 Zgodbe US-07 do US-12 niso implementirane, razen dela US-07 in US-08, ki ga MVP potrebuje.
