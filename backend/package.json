@@ -1,0 +1,23 @@
+{
+  "name": "opremnica",
+  "version": "0.1.0",
+  "description": "Opremnica – izposoja opreme v študentskem društvu",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/streznik.js",
+    "seed": "node src/seed.js",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "dependencies": {
+    "better-sqlite3": "13.0.3",
+    "express": "5.3.0",
+    "express-session": "1.19.0"
+  },
+  "devDependencies": {
+    "supertest": "7.3.2"
+  }
+}
