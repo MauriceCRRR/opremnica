@@ -78,8 +78,7 @@ export async function zacni(vloga) {
   document.querySelector('#glava').append(
     el('strong', {}, 'Opremnica'),
     el('nav', {}, ...povezave),
-    el('span', {}, `${jaz.ime} ${jaz.priimek} (${VLOGE[jaz.vloga]})`),
-    odjava,
+    el('div', { className: 'racun' }, el('span', {}, `${jaz.ime} ${jaz.priimek}`), el('small', {}, VLOGE[jaz.vloga]), odjava),
   );
   document.body.hidden = false; // do sem je stran skrita, da neprijavljen ne vidi niti ogrodja
   return jaz;

@@ -1,202 +1,334 @@
-/* Opremnica – en preprost slog za vse strani */
+/* Opremnica – en slog za vse strani: bela podlaga, levi meni, tanke sive obrobe, svetlomodri poudarki */
 :root {
-  --ozadje: #f5f6f8;
-  --papir: #fff;
-  --crta: #d9dde3;
-  --besedilo: #1d2129;
-  --bledo: #5f6875;
-  --glavna: #1f2937;
+  --besedilo: #202124;
+  --bledo: #5f6368;
+  --crta: #dadce0;
+  --sivina: #f8f9fa;
+  --modra: #1a9fdb;
+  --modra-svetla: #e5f4fc;
 }
 
 * {
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  font: 16px/1.5 system-ui, sans-serif;
-  color: var(--besedilo);
-  background: var(--ozadje);
+/* hidden mora zmagati tudi tam, kjer spodaj nastavimo display */
+[hidden] {
+  display: none !important;
 }
 
-/* glava z navigacijo */
+/* levo ozek meni, desno vsebina */
+body {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  min-height: 100vh;
+  margin: 0;
+  font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--besedilo);
+  background: #fff;
+}
+
+/* meni */
 #glava {
+  position: sticky;
+  top: 0;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 1.5rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--papir);
-  border-bottom: 1px solid var(--crta);
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100vh;
+  padding: 1.25rem 0.75rem;
+  border-right: 1px solid var(--crta);
 }
 
 #glava strong {
-  font-size: 1.25rem;
+  padding: 0 0.75rem;
+  font-size: 1.4rem;
+  letter-spacing: -0.01em;
 }
 
 #glava nav {
   display: flex;
-  flex: 1;
-  gap: 1.25rem;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 #glava a {
-  padding: 0.25rem 0;
+  padding: 0.6rem 0.75rem;
   color: var(--besedilo);
   text-decoration: none;
-  border-bottom: 2px solid transparent;
+  border-radius: 1.25rem;
 }
 
-#glava a:hover,
-#glava a.tukaj {
-  border-bottom-color: var(--glavna);
+#glava a:hover {
+  background: var(--sivina);
 }
 
 #glava a.tukaj {
   font-weight: 600;
+  background: var(--modra-svetla);
 }
 
-#glava span {
+/* kdo je prijavljen, na dnu menija */
+.racun {
+  display: grid;
+  gap: 0.1rem;
+  margin-top: auto;
+  padding: 0 0.75rem;
+}
+
+.racun small {
   color: var(--bledo);
 }
 
+.racun button {
+  margin-top: 0.75rem;
+}
+
+/* vsebina */
 main {
   max-width: 64rem;
-  margin: 0 auto;
-  padding: 1.5rem;
+  padding: 2rem 2.5rem 3rem;
 }
 
 h1 {
-  margin: 0 0 1rem;
-  font-size: 1.6rem;
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.podnaslov {
+  margin: 0.25rem 0 1.5rem;
+  color: var(--bledo);
 }
 
 /* obrazci */
 label {
   display: grid;
-  gap: 0.25rem;
-  font-size: 0.9rem;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--bledo);
 }
 
+/* polje je v oznaki label, zato mu velikost pisave vrnemo na običajno */
 input,
-select,
-button {
-  padding: 0.5rem 0.75rem;
+select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
   font: inherit;
+  font-size: 1rem;
+  font-weight: 400;
   color: var(--besedilo);
-  background: var(--papir);
+  background: #fff;
   border: 1px solid var(--crta);
-  border-radius: 6px;
+  border-radius: 8px;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--modra);
+  outline: 3px solid var(--modra-svetla);
 }
 
 button {
+  padding: 0.55rem 1.25rem;
+  font: inherit;
   font-weight: 600;
   color: #fff;
-  background: var(--glavna);
-  border-color: var(--glavna);
+  background: var(--besedilo);
+  border: 1px solid var(--besedilo);
+  border-radius: 1.25rem;
   cursor: pointer;
 }
 
 button:hover {
-  opacity: 0.9;
+  background: #3c4043;
 }
 
 button.drugi {
   color: var(--besedilo);
-  background: var(--papir);
+  background: #fff;
+  border-color: var(--crta);
 }
 
-:focus-visible {
-  outline: 2px solid #2563eb;
+button.drugi:hover {
+  background: var(--sivina);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--modra);
   outline-offset: 2px;
 }
 
+/* panel s filtri; polja se na ozkem zaslonu sama zložijo eno pod drugo */
 .filter {
   display: flex;
   flex-wrap: wrap;
   align-items: end;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--crta);
+  border-radius: 12px;
 }
 
-/* tabele */
+.filter label {
+  flex: 1 1 11rem;
+}
+
+/* tabela v okvirju; preširoka se pomika vodoravno, nič se ne odreže */
+.tabela {
+  overflow-x: auto;
+  border: 1px solid var(--crta);
+  border-radius: 12px;
+}
+
 table {
   width: 100%;
-  border-collapse: collapse;
-  background: var(--papir);
-  border: 1px solid var(--crta);
+  border-spacing: 0;
 }
 
 th,
 td {
-  padding: 0.65rem 0.9rem;
+  padding: 0.75rem 1rem;
   text-align: left;
   border-bottom: 1px solid var(--crta);
 }
 
 th {
-  font-size: 0.9rem;
-  background: #eceef1;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--bledo);
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* inventarna oznaka */
+code {
+  font: 0.9em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .opomba {
-  font-size: 0.9rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
   color: var(--bledo);
 }
 
 .napaka {
-  padding: 0.6rem 0.9rem;
-  color: #8a1c1c;
-  background: #fdf0f0;
-  border: 1px solid #e0a3a3;
-  border-radius: 6px;
+  margin: 0 0 1rem;
+  padding: 0.7rem 1rem;
+  color: #a50e0e;
+  background: #fce8e6;
+  border-radius: 8px;
 }
 
-/* značke stanj: siva je privzeta, barve povedo, ali je dobro, čaka ali je zunaj */
+/* značke stanj: siva je privzeta, zelena je dobro, rumena čaka, modra je zunaj pri članu */
 .znacka {
   display: inline-block;
-  padding: 0.1rem 0.6rem;
+  padding: 0.15rem 0.7rem;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #444b55;
-  background: #e8eaed;
+  color: #3c4043;
+  white-space: nowrap;
+  background: #f1f3f4;
   border-radius: 999px;
 }
 
 .znacka.prost,
 .znacka.odobrena,
 .znacka.aktiven {
-  color: #14663a;
-  background: #dcf5e4;
+  color: #137333;
+  background: #e6f4ea;
 }
 
 .znacka.zaseden,
 .znacka.oddana {
-  color: #7a5600;
-  background: #fdf0c8;
+  color: #8a5a00;
+  background: #fef7e0;
 }
 
 .znacka.prevzeta {
-  color: #1b4a94;
-  background: #dde9fb;
+  color: #0b5d8a;
+  background: var(--modra-svetla);
 }
 
-/* prijava */
+/* prijava: ena kartica na sredini */
+.prijava {
+  grid-template-columns: 1fr;
+  align-content: center;
+  justify-items: center;
+  padding: 1rem;
+  background: var(--sivina);
+}
+
 .prijava main {
-  max-width: 22rem;
-  margin-top: 12vh;
+  width: 100%;
+  max-width: 23rem;
   padding: 2rem;
-  background: var(--papir);
+  background: #fff;
   border: 1px solid var(--crta);
-  border-radius: 10px;
-}
-
-.prijava h1 {
-  margin-bottom: 0;
+  border-radius: 16px;
 }
 
 .prijava form {
   display: grid;
   gap: 1rem;
+}
+
+.prijava .napaka {
+  margin: 0;
+}
+
+/* ozek zaslon: meni se preseli na vrh in ostane ves viden */
+@media (max-width: 48rem) {
+  body {
+    grid-template-columns: 1fr;
+    align-content: start;
+  }
+
+  #glava {
+    position: static;
+    flex-flow: row wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    height: auto;
+    padding: 0.75rem 1rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--crta);
+  }
+
+  #glava strong {
+    padding: 0;
+  }
+
+  #glava nav {
+    flex: 1;
+    flex-flow: row wrap;
+  }
+
+  .racun {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .racun button {
+    margin: 0;
+  }
+
+  main {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  th,
+  td {
+    padding: 0.6rem 0.75rem;
+  }
 }

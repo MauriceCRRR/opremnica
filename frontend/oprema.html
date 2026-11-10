@@ -10,6 +10,7 @@
   <header id="glava"></header>
   <main>
     <h1>Oprema in razpoložljivost</h1>
+    <p class="podnaslov">Izberi termin in kategorijo ter preveri, kateri kosi so prosti.</p>
 
     <form id="filter" class="filter">
       <label>Kategorija
@@ -28,12 +29,14 @@
 
     <p id="napaka" class="napaka" role="alert" hidden></p>
 
-    <table>
-      <thead>
-        <tr><th>Oznaka</th><th>Naziv</th><th>Kategorija</th><th>V izbranem terminu</th></tr>
-      </thead>
-      <tbody id="kosi"></tbody>
-    </table>
+    <div class="tabela">
+      <table>
+        <thead>
+          <tr><th>Oznaka</th><th>Naziv</th><th>Kategorija</th><th>V izbranem terminu</th></tr>
+        </thead>
+        <tbody id="kosi"></tbody>
+      </table>
+    </div>
     <p class="opomba">Prikazani so vsi kosi razen odpisanih. Kdo je rezerviral zaseden kos, ni prikazano.</p>
   </main>
   <script type="module" src="oprema.js"></script>

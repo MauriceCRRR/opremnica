@@ -18,7 +18,7 @@ async function prikazi() {
   try {
     const seznam = await api('oprema?' + new URLSearchParams(new FormData(filter)));
     napolni(kosi, seznam.map((kos) => vrstica(
-      kos.inventarna_oznaka,
+      el('code', {}, kos.inventarna_oznaka),
       kos.naziv,
       kos.kategorija,
       znacka(kos.razpolozljivost, RAZPOLOZLJIVOST[kos.razpolozljivost]),
