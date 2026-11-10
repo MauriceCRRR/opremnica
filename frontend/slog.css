@@ -1,0 +1,202 @@
+/* Opremnica – en preprost slog za vse strani */
+:root {
+  --ozadje: #f5f6f8;
+  --papir: #fff;
+  --crta: #d9dde3;
+  --besedilo: #1d2129;
+  --bledo: #5f6875;
+  --glavna: #1f2937;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 16px/1.5 system-ui, sans-serif;
+  color: var(--besedilo);
+  background: var(--ozadje);
+}
+
+/* glava z navigacijo */
+#glava {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--papir);
+  border-bottom: 1px solid var(--crta);
+}
+
+#glava strong {
+  font-size: 1.25rem;
+}
+
+#glava nav {
+  display: flex;
+  flex: 1;
+  gap: 1.25rem;
+}
+
+#glava a {
+  padding: 0.25rem 0;
+  color: var(--besedilo);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+
+#glava a:hover,
+#glava a.tukaj {
+  border-bottom-color: var(--glavna);
+}
+
+#glava a.tukaj {
+  font-weight: 600;
+}
+
+#glava span {
+  color: var(--bledo);
+}
+
+main {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+h1 {
+  margin: 0 0 1rem;
+  font-size: 1.6rem;
+}
+
+/* obrazci */
+label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--bledo);
+}
+
+input,
+select,
+button {
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  color: var(--besedilo);
+  background: var(--papir);
+  border: 1px solid var(--crta);
+  border-radius: 6px;
+}
+
+button {
+  font-weight: 600;
+  color: #fff;
+  background: var(--glavna);
+  border-color: var(--glavna);
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button.drugi {
+  color: var(--besedilo);
+  background: var(--papir);
+}
+
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* tabele */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--papir);
+  border: 1px solid var(--crta);
+}
+
+th,
+td {
+  padding: 0.65rem 0.9rem;
+  text-align: left;
+  border-bottom: 1px solid var(--crta);
+}
+
+th {
+  font-size: 0.9rem;
+  background: #eceef1;
+}
+
+.opomba {
+  font-size: 0.9rem;
+  color: var(--bledo);
+}
+
+.napaka {
+  padding: 0.6rem 0.9rem;
+  color: #8a1c1c;
+  background: #fdf0f0;
+  border: 1px solid #e0a3a3;
+  border-radius: 6px;
+}
+
+/* značke stanj: siva je privzeta, barve povedo, ali je dobro, čaka ali je zunaj */
+.znacka {
+  display: inline-block;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444b55;
+  background: #e8eaed;
+  border-radius: 999px;
+}
+
+.znacka.prost,
+.znacka.odobrena,
+.znacka.aktiven {
+  color: #14663a;
+  background: #dcf5e4;
+}
+
+.znacka.zaseden,
+.znacka.oddana {
+  color: #7a5600;
+  background: #fdf0c8;
+}
+
+.znacka.prevzeta {
+  color: #1b4a94;
+  background: #dde9fb;
+}
+
+/* prijava */
+.prijava main {
+  max-width: 22rem;
+  margin-top: 12vh;
+  padding: 2rem;
+  background: var(--papir);
+  border: 1px solid var(--crta);
+  border-radius: 10px;
+}
+
+.prijava h1 {
+  margin-bottom: 0;
+}
+
+.prijava form {
+  display: grid;
+  gap: 1rem;
+}
