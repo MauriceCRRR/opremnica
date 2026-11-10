@@ -3,6 +3,7 @@ import express from 'express';
 import session from 'express-session';
 import { danes } from './datumi.js';
 import { preveriGeslo } from './gesla.js';
+import { opremaPoti } from './oprema.js';
 import { rezervacijePoti } from './rezervacije.js';
 import { uporabnikiPoti } from './uporabniki.js';
 
@@ -64,6 +65,7 @@ export function ustvariApp({ baza, skrivnost, zdaj = () => new Date() }) {
     res.json({ ...req.uporabnik, danes: danes(zdaj()) });
   });
 
+  app.use('/api', opremaPoti(baza));
   app.use('/api', rezervacijePoti(baza));
   app.use('/api', uporabnikiPoti(baza));
   app.use('/api', (req, res) => res.status(404).json({ napaka: 'Ta pot ne obstaja' }));
