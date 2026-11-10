@@ -113,12 +113,17 @@ test('AC2 (R1): robni primeri iz docs/05 – obstoječa rezervacija FOTO-02 za 1
   for (const [od, datumDo, stanje, pricakovano] of primeri) {
     baza.prepare('DELETE FROM rezervacija WHERE kos_id = ?').run(foto02);
     vstaviRezervacijo(baza, { stanje });
+    const prej = posnetek(baza);
 
     const odgovor = await oddaj(ana, foto02, od, datumDo);
     const opis = `${od}–${datumDo}, obstoječa ${stanje}`;
     assert.equal(odgovor.status, pricakovano, opis);
-    if (pricakovano === 409) assert.deepEqual(odgovor.body, { napaka: ZASEDENO }, opis);
-    assert.equal(steviloRezervacij(foto02), pricakovano === 201 ? 2 : 1, opis);
+    if (pricakovano === 409) {
+      assert.deepEqual(odgovor.body, { napaka: ZASEDENO }, opis);
+      assert.equal(posnetek(baza), prej, opis);
+    } else {
+      assert.equal(steviloRezervacij(foto02), 2, opis);
+    }
   }
 });
 
