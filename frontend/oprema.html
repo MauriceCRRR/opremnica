@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="sl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oprema – Opremnica</title>
+  <link rel="stylesheet" href="slog.css">
+</head>
+<body hidden>
+  <header id="glava"></header>
+  <main>
+    <h1>Oprema in razpoložljivost</h1>
+    <p class="podnaslov">Izberi termin in kategorijo ter preveri, kateri kosi so prosti.</p>
+
+    <form id="filter" class="filter">
+      <label>Kategorija
+        <select name="kategorija">
+          <option value="">Vse kategorije</option>
+        </select>
+      </label>
+      <label>Datum od
+        <input type="date" name="od" required>
+      </label>
+      <label>Datum do
+        <input type="date" name="do" required>
+      </label>
+      <button>Prikaži</button>
+    </form>
+
+    <p id="napaka" class="napaka" role="alert" hidden></p>
+
+    <div class="tabela">
+      <table>
+        <thead>
+          <tr><th>Oznaka</th><th>Naziv</th><th>Kategorija</th><th>V izbranem terminu</th></tr>
+        </thead>
+        <tbody id="kosi"></tbody>
+      </table>
+    </div>
+    <p class="opomba">Prikazani so vsi kosi razen odpisanih. Kdo je rezerviral zaseden kos, ni prikazano.</p>
+  </main>
+  <script type="module" src="oprema.js"></script>
+</body>
+</html>

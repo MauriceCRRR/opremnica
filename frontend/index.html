@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="sl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prijava – Opremnica</title>
+  <link rel="stylesheet" href="slog.css">
+</head>
+<body class="prijava">
+  <main>
+    <h1>Opremnica</h1>
+    <p class="podnaslov">Izposoja opreme v študentskem društvu</p>
+
+    <form id="prijava">
+      <label>E-naslov
+        <input type="email" name="email" autocomplete="username" required autofocus>
+      </label>
+      <label>Geslo
+        <input type="password" name="geslo" autocomplete="current-password" required>
+      </label>
+      <p id="napaka" class="napaka" role="alert" hidden></p>
+      <button>Prijava</button>
+    </form>
+  </main>
+  <script type="module" src="prijava.js"></script>
+</body>
+</html>

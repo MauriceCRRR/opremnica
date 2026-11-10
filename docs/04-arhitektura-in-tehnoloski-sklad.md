@@ -1,6 +1,6 @@
 # 04 – Arhitektura in tehnološki sklad
 
-> **Stanje:** vse v tem dokumentu je **načrtovano**. Aplikacija še ni implementirana; mapi `frontend/` in `backend/` sta prazni. Narejeni so samo dokumentacija, wireframi, ADR in repozitorij na GitHubu.
+> **Stanje:** arhitektura je postavljena in aplikacijo je mogoče lokalno zagnati. Izveden je prvi sklop MVP: prijava in dostop po vlogi (US-01) ter pregled opreme in razpoložljivosti (US-02, brez gumba *Rezerviraj*). Oddaja rezervacije, odobritev, prevzem in vračilo (US-03 do US-06) so še **načrtovani**. Pri posameznih delih spodaj je označeno, kaj je izvedeno.
 
 ## Glavni deli sistema
 
@@ -27,19 +27,23 @@
 - Brskalnik in backend tečeta na istem izvoru (`http://localhost:3000`), zato ni potrebe po nastavitvah CORS.
 - Backend do baze dostopa s knjižnico `better-sqlite3`. Preverjanje prekrivanja in zapis rezervacije potekata v eni transakciji.
 
-Glavne načrtovane poti API:
+Glavne poti API:
 
-| Pot | Kdo | Namen |
-|---|---|---|
-| `POST /api/prijava`, `POST /api/odjava` | vsi | prijava in odjava (F01) |
-| `GET /api/oprema?od=&do=&kategorija=` | prijavljeni | razpoložljivost v terminu (F02) |
-| `POST /api/rezervacije` | prijavljeni | oddaja rezervacije (F03) |
-| `GET /api/rezervacije/moje` | prijavljeni | moje rezervacije (F08) |
-| `POST /api/rezervacije/:id/preklic` | lastnik, skrbnik | preklic (F07) |
-| `GET /api/rezervacije?stanje=` | skrbnik | seznami za obdelavo in zamude (F04–F06, F11) |
-| `POST /api/rezervacije/:id/odobritev`, `/zavrnitev`, `/prevzem`, `/vracilo` | skrbnik | prehodi stanj (F04–F06) |
-| `GET/POST/PUT /api/kosi`, `/api/kategorije`, `GET /api/kosi/:id/zgodovina` | skrbnik | oprema in zgodovina (F09, F12) |
-| `GET/POST/PUT /api/uporabniki` | administrator | uporabniki in vloge (F10) |
+| Pot | Kdo | Namen | Stanje |
+|---|---|---|---|
+| `POST /api/prijava`, `POST /api/odjava` | vsi | prijava in odjava (F01) | izvedeno |
+| `GET /api/jaz` | prijavljeni | prijavljeni uporabnik in današnji dan (F01) | izvedeno |
+| `GET /api/oprema?od=&do=&kategorija=` | prijavljeni | razpoložljivost v terminu (F02) | izvedeno |
+| `GET /api/kategorije` | prijavljeni | kategorije za filter (F02) | izvedeno |
+| `POST /api/rezervacije` | prijavljeni | oddaja rezervacije (F03) | načrtovano |
+| `GET /api/rezervacije/moje` | prijavljeni | moje rezervacije (F08) | načrtovano |
+| `POST /api/rezervacije/:id/preklic` | lastnik, skrbnik | preklic (F07) | načrtovano |
+| `GET /api/rezervacije?stanje=` | skrbnik | seznami za obdelavo in zamude (F04–F06, F11) | delno: seznam vseh aktivnih rezervacij, brez filtra |
+| `POST /api/rezervacije/:id/odobritev`, `/zavrnitev`, `/prevzem`, `/vracilo` | skrbnik | prehodi stanj (F04–F06) | načrtovano |
+| `GET/POST/PUT /api/kosi`, `POST/PUT /api/kategorije`, `GET /api/kosi/:id/zgodovina` | skrbnik | oprema in zgodovina (F09, F12) | ni del MVP |
+| `GET/POST/PUT /api/uporabniki` | administrator | uporabniki in vloge (F10) | delno: samo seznam računov; urejanje ni del MVP |
+
+Vse poti razen prijave zahtevajo prijavo. Napake imajo obliko `{ "napaka": "sporočilo" }`.
 
 ## Podatkovna baza
 
@@ -52,30 +56,44 @@ Relacijska baza SQLite s tabelami `uporabnik`, `kategorija`, `kos_opreme` in `re
 - Po prijavi strežnik ustvari sejo (`express-session`). Brskalnik dobi piškotek z nastavitvama `HttpOnly` in `SameSite=Lax`.
 - Backend pri vsaki zaščiteni zahtevi iz baze prebere uporabnika: brez seje vrne 401, pri napačni vlogi 403. Zato sprememba vloge in deaktivacija veljata takoj.
 
-## Lokalni zagon (načrtovan)
+Vse to je izvedeno. Upravljanje računov prek vmesnika (F10) ni del MVP; administrator zaenkrat vidi samo seznam računov.
 
-Potrebno: Node.js LTS (različica 22 ali novejša), npm in Git. Spodnji ukazi bodo delovali, ko bo backend implementiran; zdaj še ne.
+## Podrobnosti izvedbe
+
+Manjše odločitve, sprejete med izvedbo prvega sklopa. Sklada in ADR ne spreminjajo.
+
+- **Današnji dan** je koledarski dan v Ljubljani (`Europe/Ljubljana`), ne glede na uro in časovni pas strežnika. Časi dogodkov so shranjeni kot lokalni čas, npr. `2026-11-13T17:05:00`. Frontend današnji dan dobi od strežnika in ga ne računa sam. Dnevi se štejejo v UTC, zato premik ure štetja ne spremeni.
+- **Deaktiviran račun** dobi sporočilo »Račun je deaktiviran« samo ob pravilnem geslu. Pri napačnem geslu je odgovor enak kot pri neznanem e-naslovu, zato ugibanje ne razkrije, ali račun obstaja.
+- **Pregled opreme** nikomur ne vrne podatka o tem, kdo je kos rezerviral; skrbnik člane vidi na svojem seznamu rezervacij. Za iskanje zadoščata veljavna datuma v pravem vrstnem redu; omejitvi P2 in P3 se preverita ob oddaji rezervacije (US-03).
+- **Začetni podatki** se v polno bazo ne vpišejo; ponastavitev je treba zahtevati izrecno (`npm run seed -- --ponastavi`).
+- **Testi** uporabljajo svojo bazo v pomnilniku in nadzorovan današnji dan, zato primeri z datumi ne zastarajo.
+
+## Lokalni zagon
+
+Potrebno: Node.js 22.9 ali novejši z npm in Git.
 
 ```bash
 git clone https://github.com/MauriceCRRR/opremnica.git
 cd opremnica/backend
-npm install
-npm run seed   # ustvari bazo in začetne podatke
-npm start      # aplikacija na http://localhost:3000
+npm ci                  # namesti zaklenjene odvisnosti
+cp .env.example .env    # v .env vpiši SESSION_SECRET
+npm run seed            # ustvari bazo in začetne podatke
+npm start               # aplikacija na http://localhost:3000
+npm test                # samodejni testi
 ```
 
-Skrivnost za podpisovanje sej (`SESSION_SECRET`) bo v datoteki `backend/.env`, ki je v `.gitignore`.
+Skrivnost za podpisovanje sej (`SESSION_SECRET`) je v datoteki `backend/.env`, ki je v `.gitignore`; brez nje se strežnik ne zažene. Podrobnejši koraki in testni računi so v datoteki README.
 
 ## Tehnološki sklad
 
 | Del | Tehnologija | Stanje |
 |---|---|---|
-| Frontend | HTML, CSS, JavaScript brez ogrodja, `fetch` | načrtovano |
-| Backend | Node.js (LTS), Express, REST API z JSON | načrtovano |
-| Podatkovna baza | SQLite, knjižnica `better-sqlite3` | načrtovano |
-| Avtentikacija | `express-session` (piškotek seje), `scrypt` iz `node:crypto` | načrtovano |
-| Lokalni razvoj | Node.js in npm, urejevalnik kode, brskalnik | načrtovano |
-| Testiranje | vgrajeni `node:test` in `supertest` za klice API | načrtovano |
+| Frontend | HTML, CSS, JavaScript brez ogrodja, `fetch` | izvedeno za US-01 in US-02 |
+| Backend | Node.js (LTS), Express 5, REST API z JSON | izvedeno za US-01 in US-02 |
+| Podatkovna baza | SQLite, knjižnica `better-sqlite3` | izvedeno (vse štiri tabele) |
+| Avtentikacija | `express-session` (piškotek seje), `scrypt` iz `node:crypto` | izvedeno |
+| Lokalni razvoj | Node.js in npm, urejevalnik kode, brskalnik | vzpostavljeno |
+| Testiranje | vgrajeni `node:test` in `supertest` za klice API | izvedeno za US-01 in US-02 (34 testov) |
 | Različice in proces | Git, GitHub, GitHub Flow, zaščitena veja `main` | vzpostavljeno |
 | Dokumentacija | Markdown, Mermaid, PNG wireframi | vzpostavljeno |
 

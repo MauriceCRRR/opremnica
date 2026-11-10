@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="sl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rezervacije – Opremnica</title>
+  <link rel="stylesheet" href="slog.css">
+</head>
+<body hidden>
+  <header id="glava"></header>
+  <main>
+    <h1>Rezervacije</h1>
+    <p class="podnaslov">Aktivne rezervacije (oddane, odobrene in prevzete), po datumu začetka.</p>
+
+    <div class="tabela">
+      <table>
+        <thead>
+          <tr><th>Član</th><th>Kos</th><th>Termin</th><th>Namen</th><th>Stanje</th></tr>
+        </thead>
+        <tbody id="rezervacije"></tbody>
+      </table>
+    </div>
+  </main>
+  <script type="module" src="rezervacije.js"></script>
+</body>
+</html>
