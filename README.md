@@ -1,12 +1,12 @@
 # Opremnica
 
-Spletna rešitev za izposojo opreme v študentskem društvu. Član vidi, kdaj je kos opreme prost, in ga rezervira. Skrbnik opreme rezervacijo odobri ali zavrne ter evidentira prevzem in vračilo. Sistem ne dovoli dveh rezervacij istega kosa v prekrivajočem se terminu. Administrator upravlja uporabniške račune in vloge.
+Spletna rešitev za izposojo opreme v študentskem društvu. Član vidi, kdaj je kos opreme prost, in ga rezervira. Skrbnik opreme rezervacijo odobri ali zavrne ter evidentira prevzem in vračilo. Sistem ne dovoli dveh rezervacij istega kosa v prekrivajočem se terminu. Administrator vidi pregled uporabniških računov in vlog.
 
 Projekt pri predmetu Razvoj informacijskih rešitev in storitev (RIRS), UM FERI, 2026/27. Avtor: Maurice Čižič Rottner.
 
 ## Stanje
 
-Aplikacija je v razvoju in jo je že mogoče lokalno zagnati. MVP obsega zgodbe US-01 do US-06 ([05 – Uporabniške zgodbe](docs/05-uporabniske-zgodbe.md)). Narejena sta prva dva sklopa od treh:
+MVP je narejen: vseh šest zgodb US-01 do US-06 ([05 – Uporabniške zgodbe](docs/05-uporabniske-zgodbe.md)) deluje in aplikacijo je mogoče lokalno zagnati.
 
 | Zgodba | Stanje |
 |---|---|
@@ -14,19 +14,29 @@ Aplikacija je v razvoju in jo je že mogoče lokalno zagnati. MVP obsega zgodbe 
 | US-02 Pregled opreme in razpoložljivosti | narejeno |
 | US-03 Oddaja rezervacije s preverjanjem prekrivanja | narejeno |
 | US-04 Odobritev ali zavrnitev rezervacije | narejeno |
-| US-05 Evidentiranje prevzema | še ni |
-| US-06 Evidentiranje vračila in stanja kosa | še ni |
+| US-05 Evidentiranje prevzema | narejeno |
+| US-06 Evidentiranje vračila in stanja kosa | narejeno |
 
-Kaj trenutno deluje:
+Kaj deluje:
 
 - prijava in odjava; član pride na *Oprema*, skrbnik na *Rezervacije*, administrator na *Uporabniki*,
 - pregled opreme s filtrom po kategoriji in terminu ter razpoložljivostjo »Prost«, »Zaseden v terminu« ali »V popravilu«,
 - pri prostem kosu gumb *Rezerviraj*: rezervacija za prikazani termin se shrani kot ODDANA in termin takoj zadrži. Termin se lahko začne od danes do 60 dni vnaprej in traja največ 14 dni; prekrivanje z drugo aktivno rezervacijo istega kosa sistem zavrne. Zase lahko rezervirajo vse tri vloge,
-- *Moje rezervacije*: lastne rezervacije s stanjem in razlogom zavrnitve; oddano ali odobreno rezervacijo lahko lastnik prekliče,
-- skrbnik v seznamu *Čakajoče* (od najstarejše) rezervacijo odobri ali z obveznim razlogom zavrne; zapišeta se skrbnik in čas. Odobrene in prevzete rezervacije so zaenkrat samo za branje (prevzem in vračilo sta US-05 in US-06),
-- administrator vidi seznam računov, samo za branje. Računi se naložijo z začetnimi podatki; upravljanje računov (US-10) ni del MVP.
+- *Moje rezervacije*: lastne rezervacije s stanjem, razlogom zavrnitve ali preklica in morebitno zamudo; oddano ali odobreno rezervacijo lahko lastnik prekliče,
+- skrbnik v seznamu *Čakajoče* (od najstarejše) rezervacijo odobri ali z obveznim razlogom zavrne; zapišeta se skrbnik in čas,
+- skrbnik v seznamu *Za prevzem* evidentira prevzem. Ta je mogoč samo v rezerviranem terminu, za uporaben kos in če kos ni še pri prejšnjem članu; sicer sistem pove, zakaj ne,
+- skrbnik v seznamu *Izposojeno* evidentira vračilo in izbere »brez poškodb« ali »potrebuje popravilo« (z obvezno opombo). Vrnjen kos je takoj spet prost, kos v popravilu pa ni na voljo. Zamudo sistem izračuna iz datumov in je ne shranjuje,
+- če gre kos v popravilo, skrbnik dobi seznam njegovih še neizpeljanih rezervacij in jih z razlogom zavrne ali prekliče,
+- administrator vidi seznam računov, samo za branje. Računi se naložijo z začetnimi podatki.
 
-Zgodbe US-07 do US-12 niso del MVP. Iz njih je narejeno samo tisto, kar MVP potrebuje: seznam lastnih rezervacij (del US-08) in preklic lastne rezervacije pred prevzemom (del US-07). Izbira aktivne/pretekle, opozorilo o zamudi in skrbnikov preklic z razlogom še niso narejeni.
+### Kaj ni del MVP
+
+Zgodbe US-07 do US-12 niso narejene. Iz njih je samo tisto, kar šest zgodb MVP potrebuje:
+
+- del US-07: lastnik prekliče svojo rezervacijo pred prevzemom, skrbnik pa tujo odobreno rezervacijo z razlogom,
+- del US-08: seznam lastnih rezervacij z razlogom in zamudo, brez izbire aktivne/pretekle.
+
+Urejanja opreme in kategorij (US-09), upravljanja uporabnikov (US-10), ločenega seznama zamujenih vračil (US-11) in zgodovine izposoj kosa (US-12) ni. Zato kosa, ki je šel v popravilo, v aplikaciji še ni mogoče označiti kot popravljenega; za nov preizkus ponastavi začetne podatke (glej spodaj).
 
 Razvojne naloge so na GitHub Project boardu: <https://github.com/users/MauriceCRRR/projects/5>
 
@@ -73,6 +83,17 @@ To so izmišljene osebe, samo za lokalni razvoj. Geslo vseh je `opremnica-2026`.
 | `petra.vidmar@example.org` | administrator | Uporabniki |
 | `sara.petek@example.org` | član, deaktiviran | prijava je zavrnjena |
 
+### Demonstracija celotne poti
+
+Na sveže naloženih začetnih podatkih:
+
+1. Prijavi se kot Ana. Na strani *Oprema* pusti termin na današnjem dnevu in pri FOTO-02 pritisni *Rezerviraj*, nato *Oddaj rezervacijo*. V *Moje rezervacije* je rezervacija v stanju ODDANA.
+2. Prijavi se kot Miha. V seznamu *Čakajoče* pri Anini rezervaciji pritisni *Odobri*. Ker se termin začne danes, se rezervacija pokaže v seznamu *Za prevzem*.
+3. Pritisni *Evidentiraj prevzem*. Rezervacija je zdaj v seznamu *Izposojeno*.
+4. Pritisni *Evidentiraj vračilo*, pusti »brez poškodb« in potrdi. FOTO-02 je na strani *Oprema* takoj spet prost.
+5. Zamuda in poškodba: KOLO-01 je v začetnih podatkih pri Niku in bi moral biti vrnjen včeraj, zato ima opozorilo »Zamuda 1 dan«. Pri vračilu izberi »potrebuje popravilo« in vpiši opombo. Kos je na strani *Oprema* »V popravilu« in ga ni več mogoče rezervirati.
+6. Prizadete rezervacije: če pred korakom 5 kot Ana rezerviraš KOLO-01 za prihodnji teden in jo Miha odobri, se po vračilu s poškodbo pokaže seznam *Rezervacije kosa v popravilu*. Miha jo prekliče z razlogom, Ana pa razlog vidi v *Moje rezervacije*.
+
 ## Testi
 
 ```bash
@@ -80,7 +101,7 @@ cd backend
 npm test
 ```
 
-Trenutno je 65 testov (`node:test` in `supertest`). Preverjajo API proti sprejemnim kriterijem US-01 do US-04 (tudi robne dneve termina, natanko 14 in 60 dni, hkratni oddaji in ponovljene odločitve), začetne podatke, datume po ljubljanskem času in trajnost baze. Vsak test dobi svojo bazo v pomnilniku in nadzorovan današnji dan, zato se lokalne baze ne dotakne. Katere kriterije pokriva kateri test, je v [05 – Uporabniške zgodbe](docs/05-uporabniske-zgodbe.md#stanje-preverjanja).
+Trenutno je 90 testov (`node:test` in `supertest`). Preverjajo API proti sprejemnim kriterijem US-01 do US-06 (tudi robne dneve termina, natanko 14 in 60 dni, hkratni oddaji, ponovljene odločitve, prevzem zunaj termina in nevrnjenega kosa, zamudo čez premik ure, ponovno vračilo), začetne podatke, datume po ljubljanskem času in trajnost celotne poti po ponovnem zagonu. Vsak test dobi svojo bazo v pomnilniku in nadzorovan današnji dan, zato se lokalne baze ne dotakne. Katere kriterije pokriva kateri test, je v [05 – Uporabniške zgodbe](docs/05-uporabniske-zgodbe.md#stanje-preverjanja).
 
 ## Tehnologije
 

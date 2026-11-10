@@ -1,4 +1,4 @@
-import { api, gumb, lepTermin, napolni, obOddaji, pokazi, vrstica, zacni, znacka } from './skupno.js';
+import { api, dni, gumb, lepTermin, napolni, obOddaji, pokazi, vrstica, zacni, znacka } from './skupno.js';
 
 await zacni();
 const napaka = document.querySelector('#napaka');
@@ -6,6 +6,13 @@ const okno = document.querySelector('#preklic');
 let preklicujem = null; // rezervacija v odprtem oknu
 
 const kos = (r) => `${r.inventarna_oznaka} · ${r.naziv}`;
+
+// razlog zavrnitve ali preklica, sicer morebitna zamuda pri vračilu
+function opomba(r) {
+  if (r.razlog) return r.razlog;
+  if (!r.zamuda) return '–';
+  return r.stanje === 'PREVZETA' ? `Vračilo zamuja ${dni(r.zamuda)}` : `Vrnjeno z zamudo ${dni(r.zamuda)}`;
+}
 
 function odpri(r) {
   preklicujem = r;
@@ -21,7 +28,7 @@ async function prikazi() {
     lepTermin(r.datum_od, r.datum_do),
     r.namen || '–',
     znacka(r.stanje),
-    r.razlog || '–',
+    opomba(r),
     // preklic samo pred prevzemom
     r.stanje === 'ODDANA' || r.stanje === 'ODOBRENA' ? gumb('Prekliči', () => odpri(r), 'drugi') : '–',
   )), 'Nimaš še nobene rezervacije.');

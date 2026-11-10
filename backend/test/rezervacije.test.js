@@ -52,6 +52,8 @@ test('AC1: veljavna rezervacija se shrani kot ODDANA in je v Mojih rezervacijah'
     stanje: 'ODDANA',
     razlog: null,
     oddano_ob: '2026-11-11T10:00:00',
+    vrnjeno_ob: null,
+    zamuda: 0,
     inventarna_oznaka: 'FOTO-02',
     naziv: 'Fotoaparat, brezzrcalni',
   });

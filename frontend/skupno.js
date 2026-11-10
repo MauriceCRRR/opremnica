@@ -50,6 +50,12 @@ export function lepTermin(od, datumDo) {
   return od === datumDo ? lepDatum(od) : `${lepDatum(od)} – ${lepDatum(datumDo)}`;
 }
 
+// 1 dan, 2 dneva, 3 dni
+export function dni(n) {
+  if (n === 1) return '1 dan';
+  return n === 2 ? '2 dneva' : `${n} dni`;
+}
+
 // besedilo v element; prazno besedilo ga skrije
 export function pokazi(element, besedilo) {
   element.textContent = besedilo;

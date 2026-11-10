@@ -1,4 +1,4 @@
-import { api, el, gumb, lepTermin, napolni, obOddaji, pokazi, vrstica, zacni, znacka } from './skupno.js';
+import { api, dni, el, gumb, lepTermin, napolni, obOddaji, pokazi, vrstica, zacni, znacka } from './skupno.js';
 
 const RAZPOLOZLJIVOST = { PROST: 'Prost', ZASEDEN: 'Zaseden v terminu', V_POPRAVILU: 'V popravilu' };
 
@@ -22,11 +22,7 @@ let zadnja = 0; // številka zadnje poizvedbe
 let izbira = null; // kos in termin v odprtem oknu
 
 // koliko traja termin, oba dneva vključena
-function trajanje(od, datumDo) {
-  const n = (Date.parse(datumDo) - Date.parse(od)) / 86400000 + 1;
-  if (n === 1) return '1 dan';
-  return n === 2 ? '2 dneva' : `${n} dni`;
-}
+const trajanje = (od, datumDo) => dni((Date.parse(datumDo) - Date.parse(od)) / 86400000 + 1);
 
 // Okno dobi termin, za katerega je bil seznam izračunan, ne tistega, ki je ta hip v filtru.
 function odpri(kos, od, datumDo) {

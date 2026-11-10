@@ -281,6 +281,11 @@ tbody tr:last-child td {
   background: var(--modra-svetla);
 }
 
+.znacka.zamuda {
+  color: #a50e0e;
+  background: #fce8e6;
+}
+
 .uspeh {
   margin: 0 0 1rem;
   padding: 0.7rem 1rem;
@@ -301,7 +306,8 @@ h2 {
   font-weight: 600;
 }
 
-.tabela + h2 {
+.tabela + h2,
+section + h2 {
   margin-top: 2rem;
 }
 
@@ -357,6 +363,41 @@ dialog h2,
 dialog .opomba,
 dialog .napaka {
   margin: 0;
+}
+
+/* izbira stanja kosa v oknu za vračilo */
+fieldset {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+legend {
+  margin-bottom: 0.35rem;
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--bledo);
+}
+
+.izbira {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--besedilo);
+}
+
+/* splošna pravila za polja (širina, višina) za izbirni gumb ne veljajo */
+input[type='radio'] {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--modra);
 }
 
 /* kos in termin v oknu: ime levo, vrednost desno */

@@ -230,15 +230,15 @@ Primeri so bili načrtovani pred implementacijo. Stolpec *Stanje* pove, kateri s
 | T1 | Prekrivanje: FOTO-02 ima `ODOBRENO` rezervacijo 13.–16. 11., nova rezervacija za 16.–18. 11. | zavrnjeno, nova rezervacija ni shranjena | US-03 | pokrito: `rezervacije.test.js` |
 | T2 | Nedovoljen prehod: odobritev rezervacije v stanju `ZAVRNJENA` | napaka, stanje ostane `ZAVRNJENA` | US-04 | pokrito: `odobritev.test.js` |
 | T3 | Brez pravice: član pokliče odobritev | 403, stanje ostane `ODDANA` | US-04 | pokrito: `odobritev.test.js` |
-| T4 | Vračilo že vrnjene rezervacije | napaka, čas vračila se ne spremeni | US-06 | še ni (pride z US-06) |
+| T4 | Vračilo že vrnjene rezervacije | napaka, čas vračila se ne spremeni | US-06 | pokrito: `vracilo.test.js` |
 | T5 | Neveljaven datum: datum do pred datumom od ali začetek v preteklosti | zavrnjeno s sporočilom o vzroku | US-02, US-03 | pokrito: `oprema.test.js` in `rezervacije.test.js` |
-| T6 | Prevzem kosa, ki ga prejšnji član še ni vrnil | zavrnjeno, prikazano, pri kom je kos | US-05 | še ni (pride z US-05) |
+| T6 | Prevzem kosa, ki ga prejšnji član še ni vrnil | zavrnjeno, prikazano, pri kom je kos | US-05 | pokrito: `prevzem.test.js` |
 | T7 | Trajnost: oddaja rezervacije, ponovni zagon strežnika | rezervacija in njeno stanje sta še vedno v bazi | US-03, US-08 | pokrito: `rezervacije.test.js` |
-| T8 | Dan vračila: FOTO-02 (termin 13.–16. 11.) je vrnjen 16. 11., nova rezervacija za 16.–18. 11. | shranjeno, ker vrnjena rezervacija ni aktivna | US-03, US-06 | delno: vrnjena rezervacija ne zaseda termina (`rezervacije.test.js`, stanje je vpisano neposredno v bazo); samo vračilo pride z US-06 |
+| T8 | Dan vračila: FOTO-02 (termin 13.–16. 11.) je vrnjen 16. 11., nova rezervacija za 16.–18. 11. | shranjeno, ker vrnjena rezervacija ni aktivna | US-03, US-06 | pokrito: `vracilo.test.js` (vračilo prek API, nato nova rezervacija od dneva vračila) in `rezervacije.test.js` |
 
 ## Stanje preverjanja
 
-Stanje po drugem razvojnem sklopu (US-01 do US-04). Samodejni testi so v `backend/test/` in se zaženejo z `npm test`. Trenutno jih je 65 in vsi uspejo. Testi uporabljajo svojo bazo v pomnilniku in nadzorovan današnji dan (sreda, 11. 11. 2026). Kjer zahteva mora biti zavrnjena, test preveri tudi, da se v bazi ni nič spremenilo.
+Stanje po tretjem, zadnjem sklopu MVP (US-01 do US-06). Samodejni testi so v `backend/test/` in se zaženejo z `npm test`. Trenutno jih je 90 in vsi uspejo. Testi uporabljajo svojo bazo v pomnilniku in nadzorovan današnji dan (sreda, 11. 11. 2026), ki ga lahko premaknejo, da preverijo prevzem in vračilo na druge dni. Kjer zahteva mora biti zavrnjena, test preveri tudi, da se v bazi ni nič spremenilo.
 
 | Zgodba | Kriterij | Samodejni test | Opomba |
 |---|---|---|---|
@@ -263,9 +263,26 @@ Stanje po drugem razvojnem sklopu (US-01 do US-04). Samodejni testi so v `backen
 | US-04 | 3 zavrnitev z razlogom | `odobritev.test.js`: brez razloga 400; z razlogom ga član vidi, termin je spet prost | |
 | US-04 | 4 ni več `ODDANA` (R2) | `odobritev.test.js`: po preklicu člana, ponovljena in hkratna odločitev, zavrnjena, prevzeta in vrnjena rezervacija | sporočilo »Rezervacija ni več v stanju ODDANA« |
 | US-04 | 5 član in administrator (R3) | `odobritev.test.js`: 403, stanje ostane `ODDANA`; neobstoječa številka 404 | |
+| US-05 | 1 seznam *Za prevzem* | `prevzem.test.js`: odobrene z začetkom danes ali prej, po datumu začetka; poznejše in neodobrene niso zraven | |
+| US-05 | 2 prevzem | `prevzem.test.js`: stanje `PREVZETA` in čas prevzema, član vidi novo stanje | |
+| US-05 | 3 zunaj termina (R5, P6) | `prevzem.test.js`: dan pred začetkom in dan po koncu ne, prvi in zadnji dan da; meja je ljubljanska polnoč | sporočilo »Prevzem je mogoč samo v rezerviranem terminu« |
+| US-05 | 4 kos še ni vrnjen (R5) | `prevzem.test.js`: zavrnjeno, odgovor pove člana in rok vračila; po vračilu prevzem uspe | velja tudi, če je prejšnji rok že minil |
+| US-05 | 5 kos ni uporaben (R4) | `prevzem.test.js`: kos v popravilu in odpisan kos | |
+| US-05 | druga stanja in vloge (R2, R3) | `prevzem.test.js`: samo odobrena rezervacija, drugi poskus ne spremeni časa; član in administrator 403 | |
+| US-06 | 1 vračilo samo iz `PREVZETA`, kos takoj prost | `vracilo.test.js`: stanje in čas vračila; nova rezervacija isti dan in po predčasnem vračilu uspe; druga stanja zavrnjena | |
+| US-06 | 2 stanje kosa ob vračilu | `vracilo.test.js`: popravilo brez opombe 400; z opombo kos postane `V_POPRAVILU` in ga ni mogoče rezervirati; brez poškodb ostane uporaben | rezervacija in kos se spremenita v eni transakciji |
+| US-06 | 3 zamuda | `vracilo.test.js`: dnevi zamude pred vračilom in po njem, zadnji dan brez zamude, polnoč po ljubljanskem času, premik ure jeseni in spomladi; v bazi ni stolpca za zamudo | |
+| US-06 | 4 ponovno vračilo (R2) | `vracilo.test.js`: 409, čas, opomba in stanje kosa ostanejo | |
+| US-06 | 5 prizadete rezervacije | `vracilo.test.js`: odgovor našteje še neizpeljane rezervacije kosa; prevzem je blokiran; skrbnik jih zavrne oziroma prekliče z razlogom, član razlog vidi | seznam na zaslonu nariše frontend (`rezervacije.js`) |
+| US-03 do US-06 | celotna pot | `vracilo.test.js`: rezervacija, odobritev, prevzem in pozno vračilo s poškodbo, pred vsakim korakom ponovni zagon nad isto datoteko baze | |
 
-Poleg tega `datumi.test.js` preveri današnji dan po ljubljanskem času (tudi ob prehodu na zimski čas), veljavnost datumov in štetje dni, `baza.test.js` začetne podatke, omejitve v bazi in trajnost, `preklic.test.js` preklic lastne rezervacije (podpora MVP, del US-07), `frontend.test.js` pa, da frontend streže isti strežnik.
+Poleg tega `datumi.test.js` preveri današnji dan po ljubljanskem času (tudi ob prehodu na zimski čas), veljavnost datumov in štetje dni, `baza.test.js` začetne podatke, omejitve v bazi in trajnost, `preklic.test.js` preklic lastne rezervacije in skrbnikov preklic odobrene rezervacije z razlogom (podpora MVP, del US-07), `frontend.test.js` pa, da frontend streže isti strežnik.
 
-Frontend nima samodejnih testov v brskalniku. Glavna pot prvega sklopa (napačno geslo, začetni zasloni vseh treh vlog, filter po kategoriji in terminu, sporočilo ob obrnjenih datumih, odjava) je bila 10. 11. 2026 pregledana v brskalniku.
+Frontend nima samodejnih testov v brskalniku. V brskalniku je bilo pregledano:
 
-US-05 in US-06 še nista implementirani in zato še nista preverjeni.
+- 10. 11. 2026, prvi sklop: napačno geslo, začetni zasloni vseh treh vlog, filter po kategoriji in terminu, sporočilo ob obrnjenih datumih, odjava;
+- 11. 11. 2026, drugi sklop: samodejna osvežitev seznama ob spremembi termina, rezervacija dveh kosov z oknom, ki pokaže pravi kos in termin, *Moje rezervacije*, seznam *Čakajoče*, odobritev, zavrnitev (brez razloga in s samimi presledki je ustavljena), prikaz razloga članu in preklic lastne rezervacije.
+
+11. 11. 2026 je bil v brskalniku pregledan tudi tretji sklop: prevzem je pravilno zavrnjen, dokler prejšnji član kosa ne vrne; po vračilu uspe. Vračilo z enodnevno zamudo jo pravilno izpiše. Pri poškodbi je prazna opomba zavrnjena, veljavno vračilo pa kos označi kot »V popravilu« in pokaže prizadeto prihodnjo rezervacijo. Skrbnik jo prekliče z obveznim razlogom, član vidi stanje in razlog, kos v popravilu pa nima gumba za novo rezervacijo.
+
+Zgodbe US-07 do US-12 niso implementirane, razen dela US-07 in US-08, ki ga MVP potrebuje.
