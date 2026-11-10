@@ -176,6 +176,25 @@ test('AC5: ob poškodbi odgovor našteje še neizpeljane rezervacije kosa; te so
   assert.equal(stanjeRezervacije(baza, odobrena), 'ODOBRENA');
 });
 
+test('AC5: prizadeti rezervaciji skrbnik zavrne oziroma prekliče z razlogom, član razlog vidi', async () => {
+  const oddana = vstaviRezervacijo(baza, { oznaka: 'KOLO-01', email: ANA, od: '2026-11-20', datumDo: '2026-11-21', stanje: 'ODDANA' });
+  const odobrena = vstaviRezervacijo(baza, { oznaka: 'KOLO-01', email: ANA, od: '2026-11-14', datumDo: '2026-11-15', stanje: 'ODOBRENA' });
+  const { prizadete } = (await vrni(miha, izposojena, POPRAVILO)).body;
+  assert.equal(prizadete.length, 2);
+
+  const razlog = 'Kolo je v popravilu.';
+  await miha.post(`/api/rezervacije/${oddana}/zavrnitev`).send({ razlog }).expect(200);
+  await miha.post(`/api/rezervacije/${odobrena}/preklic`).send({ razlog }).expect(200);
+
+  const moje = (await (await prijavi(app, ANA)).get('/api/rezervacije/moje')).body;
+  assert.deepEqual(
+    moje.filter((m) => m.inventarna_oznaka === 'KOLO-01').map((m) => [m.stanje, m.razlog]).sort(),
+    [['PREKLICANA', razlog], ['ZAVRNJENA', razlog]],
+  );
+  // za ta kos ni več nobene aktivne rezervacije
+  assert.deepEqual((await miha.get('/api/rezervacije')).body.filter((r) => r.inventarna_oznaka === 'KOLO-01'), []);
+});
+
 test('AC5: brez poškodb ni prizadetih rezervacij', async () => {
   vstaviRezervacijo(baza, { oznaka: 'KOLO-01', email: ANA, od: '2026-11-14', datumDo: '2026-11-15', stanje: 'ODOBRENA' });
   assert.deepEqual((await vrni(miha, izposojena)).body, { stanje: 'VRNJENA', zamuda: 1, prizadete: [] });

@@ -108,21 +108,31 @@ export function rezervacijePoti(baza, zdaj) {
   // id iz naslova; če ni število, je null in se ne ujame z nobeno rezervacijo
   const idIz = (req) => (/^\d+$/.test(req.params.id) ? Number(req.params.id) : null);
 
-  // Preklic lastne rezervacije pred prevzemom. Pogoj na stanje je v samem UPDATE,
-  // zato se že prevzeta ali zaključena rezervacija ne spremeni.
+  // Preklic pred prevzemom. Lastnik prekliče svojo oddano ali odobreno rezervacijo;
+  // skrbnik tujo samo, če je odobrena, in z obveznim razlogom (oddano zavrne).
+  // Pogoj na stanje je v samem UPDATE, zato se prevzeta ali zaključena rezervacija ne spremeni.
   poti.post('/rezervacije/:id/preklic', (req, res) => {
     const id = idIz(req);
+    const razlog = String(req.body?.razlog ?? '').trim();
     const rezervacija = baza.prepare('SELECT clan_id, stanje FROM rezervacija WHERE id = ?').get(id);
     if (!rezervacija) return res.status(404).json({ napaka: 'Rezervacija ne obstaja' });
-    if (rezervacija.clan_id !== req.uporabnik.id) {
+
+    const lastnik = rezervacija.clan_id === req.uporabnik.id;
+    if (!lastnik && req.uporabnik.vloga !== 'SKRBNIK') {
       return res.status(403).json({ napaka: 'Prekličeš lahko samo svojo rezervacijo' });
     }
+    if (!lastnik && !razlog) return res.status(400).json({ napaka: 'Razlog preklica je obvezen' });
+    if (razlog.length > 300) return res.status(400).json({ napaka: 'Razlog je predolg (največ 300 znakov)' });
 
+    const dovoljena = lastnik ? "('ODDANA', 'ODOBRENA')" : "('ODOBRENA')";
     const { changes } = baza.prepare(
-      "UPDATE rezervacija SET stanje = 'PREKLICANA' WHERE id = ? AND stanje IN ('ODDANA', 'ODOBRENA')",
-    ).run(id);
+      `UPDATE rezervacija SET stanje = 'PREKLICANA', razlog = ? WHERE id = ? AND stanje IN ${dovoljena}`,
+    ).run(razlog || null, id);
     if (!changes) {
-      return res.status(409).json({ napaka: `Rezervacije v stanju ${rezervacija.stanje} ni mogoče preklicati` });
+      const napaka = !lastnik && rezervacija.stanje === 'ODDANA'
+        ? 'Oddane rezervacije skrbnik ne prekliče, ampak jo zavrne'
+        : `Rezervacije v stanju ${rezervacija.stanje} ni mogoče preklicati`;
+      return res.status(409).json({ napaka });
     }
     res.json({ stanje: 'PREKLICANA' });
   });
