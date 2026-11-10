@@ -1,21 +1,90 @@
 import { Router } from 'express';
 import { AKTIVNA } from './baza.js';
+import { danes, lokalniCas, napakaTermina, razlikaDni } from './datumi.js';
 import { samo } from './pravice.js';
 
-export function rezervacijePoti(baza) {
+const NAJVEC_DNI = 14; // P2
+const NAJVEC_VNAPREJ = 60; // P3
+
+// zakaj oddaja ni veljavna (sporočilo pove vzrok) ali null, če je vse v redu
+function napakaOddaje({ kos, od, do: datumDo, namen }, danasnji) {
+  if (!Number.isInteger(kos)) return 'Izberi kos';
+  const napaka = napakaTermina(od, datumDo);
+  if (napaka) return napaka;
+  if (od < danasnji) return 'Termin se ne sme začeti v preteklosti';
+  if (razlikaDni(danasnji, od) > NAJVEC_VNAPREJ) return `Termin se lahko začne največ ${NAJVEC_VNAPREJ} dni od danes`;
+  if (razlikaDni(od, datumDo) + 1 > NAJVEC_DNI) return `Rezervacija lahko traja največ ${NAJVEC_DNI} dni`;
+  if (namen?.length > 200) return 'Namen je predolg (največ 200 znakov)';
+  return null;
+}
+
+export function rezervacijePoti(baza, zdaj) {
   const poti = Router();
 
-  // skrbnikov pregled: aktivne rezervacije s članom, kosom in terminom
+  // Preverjanje in vpis sta v isti transakciji (BEGIN IMMEDIATE), zato od dveh
+  // hkratnih oddaj za isti kos in prekrivajoč se termin uspe samo prva.
+  const oddaj = baza.transaction((rezervacija) => {
+    const kos = baza.prepare('SELECT stanje_kosa FROM kos_opreme WHERE id = ?').get(rezervacija.kos);
+    if (!kos) return { status: 404, napaka: 'Kos ne obstaja' };
+    if (kos.stanje_kosa !== 'UPORABEN') {
+      return { status: 409, napaka: 'Kos je v popravilu ali odpisan, zato ga ni mogoče rezervirati' };
+    }
+
+    // termina se prekrivata, če velja A.od <= B.do in B.od <= A.do
+    const zaseden = baza.prepare(`
+      SELECT 1 FROM rezervacija
+      WHERE kos_id = @kos AND stanje IN ${AKTIVNA} AND datum_od <= @do AND @od <= datum_do
+    `).get(rezervacija);
+    if (zaseden) return { status: 409, napaka: 'Kos je v izbranem terminu že rezerviran' };
+
+    const { lastInsertRowid } = baza.prepare(`
+      INSERT INTO rezervacija (clan_id, kos_id, datum_od, datum_do, namen, stanje, oddano_ob)
+      VALUES (@clan, @kos, @od, @do, @namen, 'ODDANA', @oddano)
+    `).run(rezervacija);
+    return { status: 201, id: Number(lastInsertRowid), stanje: 'ODDANA' };
+  });
+
+  // Oddaja rezervacije. Lastnik je vedno prijavljeni uporabnik; clan_id iz zahteve se ne bere.
+  poti.post('/rezervacije', (req, res) => {
+    const rezervacija = {
+      clan: req.uporabnik.id,
+      kos: req.body?.kos_id,
+      od: req.body?.datum_od,
+      do: req.body?.datum_do,
+      namen: String(req.body?.namen ?? '').trim() || null,
+      oddano: lokalniCas(zdaj()),
+    };
+    const napaka = napakaOddaje(rezervacija, danes(zdaj()));
+    if (napaka) return res.status(400).json({ napaka });
+
+    const { status, ...izid } = oddaj.immediate(rezervacija);
+    res.status(status).json(izid);
+  });
+
+  // samo rezervacije prijavljenega uporabnika, najnovejša na vrhu
+  poti.get('/rezervacije/moje', (req, res) => {
+    res.json(baza.prepare(`
+      SELECT r.id, r.datum_od, r.datum_do, r.namen, r.stanje, r.razlog, r.oddano_ob,
+             k.inventarna_oznaka, k.naziv
+      FROM rezervacija r
+      JOIN kos_opreme k ON k.id = r.kos_id
+      WHERE r.clan_id = ?
+      ORDER BY r.oddano_ob DESC, r.id DESC
+    `).all(req.uporabnik.id));
+  });
+
+  // skrbnikov pregled aktivnih rezervacij:
+  // čakajoče po času oddaje (najstarejša prva), ostale po datumu začetka
   poti.get('/rezervacije', samo('SKRBNIK'), (req, res) => {
     res.json(baza.prepare(`
-      SELECT r.id, r.datum_od, r.datum_do, r.namen, r.stanje,
+      SELECT r.id, r.datum_od, r.datum_do, r.namen, r.stanje, r.oddano_ob,
              u.ime || ' ' || u.priimek AS clan,
              k.inventarna_oznaka, k.naziv
       FROM rezervacija r
       JOIN uporabnik u ON u.id = r.clan_id
       JOIN kos_opreme k ON k.id = r.kos_id
       WHERE r.stanje IN ${AKTIVNA}
-      ORDER BY r.datum_od, r.id
+      ORDER BY CASE r.stanje WHEN 'ODDANA' THEN r.oddano_ob ELSE r.datum_od END, r.id
     `).all());
   });
 

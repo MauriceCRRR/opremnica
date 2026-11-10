@@ -30,3 +30,15 @@ export function pristejDni(datum, n) {
   d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
 }
+
+// koliko dni je od datuma a do datuma b (b - a)
+export function razlikaDni(a, b) {
+  return (Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 86400000;
+}
+
+// osnovna preverba termina; vrne sporočilo napake ali null
+export function napakaTermina(od, datumDo) {
+  if (!jeDatum(od) || !jeDatum(datumDo)) return 'Vnesi veljavna datuma od in do';
+  if (datumDo < od) return 'Datum do ne sme biti pred datumom od';
+  return null;
+}

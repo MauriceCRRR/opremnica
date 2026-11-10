@@ -1,7 +1,7 @@
 // US-02 Pregled opreme in razpoložljivosti
 import assert from 'node:assert/strict';
 import { beforeEach, test } from 'node:test';
-import { ANA, MIHA, prijavi, pripravi } from './pomoc.js';
+import { ANA, MIHA, prijavi, pripravi, vstaviRezervacijo } from './pomoc.js';
 
 let app, baza, ana;
 beforeEach(async () => {
@@ -16,14 +16,7 @@ async function razpolozljivost(oznaka, od, datumDo) {
 }
 
 // FOTO-02 v začetnih podatkih nima rezervacij; tu mu dodamo eno za 13.–16. 11.
-function rezervirajFoto02(stanje) {
-  baza.prepare(`
-    INSERT INTO rezervacija (clan_id, kos_id, datum_od, datum_do, stanje, oddano_ob)
-    SELECT u.id, k.id, '2026-11-13', '2026-11-16', ?, '2026-11-10T12:00:00'
-    FROM uporabnik u, kos_opreme k
-    WHERE u.email = 'nik.zupan@example.org' AND k.inventarna_oznaka = 'FOTO-02'
-  `).run(stanje);
-}
+const rezervirajFoto02 = (stanje) => vstaviRezervacijo(baza, { stanje });
 
 test('AC1: seznam ima vse kose razen odpisanih, z oznako, nazivom, kategorijo in razpoložljivostjo', async () => {
   const kosi = (await ana.get('/api/oprema?od=2026-11-13&do=2026-11-16')).body;
