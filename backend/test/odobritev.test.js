@@ -43,6 +43,7 @@ test('AC1: čakajoče so razvrščene po času oddaje od najstarejše, s članom
     naziv: 'Šotor za 4 osebe',
     stanje_kosa: 'UPORABEN',
     za_prevzem: false,
+    zamuda: 0,
   });
 });
 
