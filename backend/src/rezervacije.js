@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AKTIVNA } from './baza.js';
-import { danes, lokalniCas, napakaTermina, razlikaDni } from './datumi.js';
+import { danes, lepDatum, lokalniCas, napakaTermina, razlikaDni } from './datumi.js';
 import { samo } from './pravice.js';
 
 const NAJVEC_DNI = 14; // P2
@@ -73,19 +73,25 @@ export function rezervacijePoti(baza, zdaj) {
     `).all(req.uporabnik.id));
   });
 
-  // skrbnikov pregled aktivnih rezervacij:
-  // čakajoče po času oddaje (najstarejša prva), ostale po datumu začetka
+  // skrbnikov pregled aktivnih rezervacij: čakajoče po času oddaje (najstarejša prva),
+  // izposojene po roku vračila, odobrene po datumu začetka
   poti.get('/rezervacije', samo('SKRBNIK'), (req, res) => {
-    res.json(baza.prepare(`
+    const danasnji = danes(zdaj());
+    const rezervacije = baza.prepare(`
       SELECT r.id, r.datum_od, r.datum_do, r.namen, r.stanje, r.oddano_ob,
              u.ime || ' ' || u.priimek AS clan,
-             k.inventarna_oznaka, k.naziv
+             k.inventarna_oznaka, k.naziv, k.stanje_kosa
       FROM rezervacija r
       JOIN uporabnik u ON u.id = r.clan_id
       JOIN kos_opreme k ON k.id = r.kos_id
       WHERE r.stanje IN ${AKTIVNA}
-      ORDER BY CASE r.stanje WHEN 'ODDANA' THEN r.oddano_ob ELSE r.datum_od END, r.id
-    `).all());
+      ORDER BY CASE r.stanje WHEN 'ODDANA' THEN r.oddano_ob WHEN 'PREVZETA' THEN r.datum_do ELSE r.datum_od END, r.id
+    `).all();
+    res.json(rezervacije.map((r) => ({
+      ...r,
+      // seznam Za prevzem: odobrena in termin se je že začel
+      za_prevzem: r.stanje === 'ODOBRENA' && r.datum_od <= danasnji,
+    })));
   });
 
   // id iz naslova; če ni število, je null in se ne ujame z nobeno rezervacijo
@@ -134,6 +140,47 @@ export function rezervacijePoti(baza, zdaj) {
     if (!razlog) return res.status(400).json({ napaka: 'Razlog zavrnitve je obvezen' });
     if (razlog.length > 300) return res.status(400).json({ napaka: 'Razlog je predolg (največ 300 znakov)' });
     odloci(req, res, 'ZAVRNJENA', razlog);
+  });
+
+  // Prevzem: pogoji in zapis so v eni transakciji, da se med preverjanjem nič ne spremeni.
+  const prevzemi = baza.transaction((id, danasnji, cas) => {
+    const r = baza.prepare(`
+      SELECT r.stanje, r.kos_id, r.datum_od, r.datum_do, k.stanje_kosa
+      FROM rezervacija r
+      JOIN kos_opreme k ON k.id = r.kos_id
+      WHERE r.id = ?
+    `).get(id);
+    if (!r) return { status: 404, napaka: 'Rezervacija ne obstaja' };
+    if (r.stanje !== 'ODOBRENA') return { status: 409, napaka: 'Prevzeti je mogoče samo odobreno rezervacijo' };
+    if (danasnji < r.datum_od || danasnji > r.datum_do) {
+      return { status: 409, napaka: 'Prevzem je mogoč samo v rezerviranem terminu' };
+    }
+    if (r.stanje_kosa !== 'UPORABEN') {
+      return { status: 409, napaka: 'Kos je v popravilu ali odpisan, zato ga ni mogoče prevzeti' };
+    }
+
+    // kos je lahko še pri prejšnjem članu, tudi če je njegov termin že minil
+    const zunaj = baza.prepare(`
+      SELECT u.ime || ' ' || u.priimek AS clan, x.datum_do AS vrniti_do
+      FROM rezervacija x
+      JOIN uporabnik u ON u.id = x.clan_id
+      WHERE x.kos_id = ? AND x.stanje = 'PREVZETA'
+    `).get(r.kos_id);
+    if (zunaj) {
+      return {
+        status: 409,
+        napaka: `Kos je še pri članu ${zunaj.clan}, vrniti bi ga moral do ${lepDatum(zunaj.vrniti_do)}`,
+        ...zunaj,
+      };
+    }
+
+    baza.prepare("UPDATE rezervacija SET stanje = 'PREVZETA', prevzeto_ob = ? WHERE id = ?").run(cas, id);
+    return { status: 200, stanje: 'PREVZETA' };
+  });
+
+  poti.post('/rezervacije/:id/prevzem', samo('SKRBNIK'), (req, res) => {
+    const { status, ...izid } = prevzemi.immediate(idIz(req), danes(zdaj()), lokalniCas(zdaj()));
+    res.status(status).json(izid);
   });
 
   return poti;

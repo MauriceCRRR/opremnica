@@ -31,6 +31,12 @@ export function pristejDni(datum, n) {
   return d.toISOString().slice(0, 10);
 }
 
+// '2026-11-13' -> '13. 11. 2026', za sporočila
+export function lepDatum(datum) {
+  const [leto, mesec, dan] = datum.split('-').map(Number);
+  return `${dan}. ${mesec}. ${leto}`;
+}
+
 // koliko dni je od datuma a do datuma b (b - a)
 export function razlikaDni(a, b) {
   return (Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 86400000;

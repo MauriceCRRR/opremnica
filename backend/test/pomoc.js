@@ -12,13 +12,15 @@ export const MIHA = 'miha.kos@example.org'; // skrbnik
 export const PETRA = 'petra.vidmar@example.org'; // administratorka
 export const SARA = 'sara.petek@example.org'; // deaktivirana
 
-// Baza z začetnimi podatki in aplikacija nad njo; ura stoji na izbranem dnevu ob 10:00.
+// Baza z začetnimi podatki in aplikacija nad njo; ura stoji na izbranem dnevu ob 10:00,
+// dokler je test ne premakne (npr. premakniUro('2026-11-13T09:00:00+01:00')).
 // Če datoteka že ima podatke, jih pusti; tako isti klic odigra tudi ponovni zagon.
 export function pripravi(pot = ':memory:', dan = DANES) {
   const baza = odpriBazo(pot);
   vpisiZacetnePodatke(baza, dan);
-  const zdaj = () => new Date(dan + 'T10:00:00+01:00');
-  return { baza, app: ustvariApp({ baza, skrivnost: 'samo-za-teste', zdaj }) };
+  let trenutek = new Date(dan + 'T10:00:00+01:00');
+  const app = ustvariApp({ baza, skrivnost: 'samo-za-teste', zdaj: () => trenutek });
+  return { baza, app, premakniUro: (cas) => { trenutek = new Date(cas); } };
 }
 
 // odjemalec, ki si zapomni piškotek seje
