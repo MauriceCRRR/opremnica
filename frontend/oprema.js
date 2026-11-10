@@ -12,22 +12,33 @@ for (const kategorija of await api('kategorije')) {
 }
 filter.od.value = filter.do.value = jaz.danes;
 
+let zadnja = 0; // številka zadnje poizvedbe
+
 // termin preveri strežnik; tu samo pokažemo seznam ali njegovo sporočilo
 async function prikazi() {
-  napaka.hidden = true;
+  const moja = ++zadnja;
+  let seznam = [];
+  let sporocilo = '';
   try {
-    const seznam = await api('oprema?' + new URLSearchParams(new FormData(filter)));
-    napolni(kosi, seznam.map((kos) => vrstica(
-      el('code', {}, kos.inventarna_oznaka),
-      kos.naziv,
-      kos.kategorija,
-      znacka(kos.razpolozljivost, RAZPOLOZLJIVOST[kos.razpolozljivost]),
-    )), 'V tej kategoriji ni kosov.');
+    seznam = await api('oprema?' + new URLSearchParams(new FormData(filter)));
   } catch (e) {
-    kosi.replaceChildren();
-    napaka.textContent = e.message;
-    napaka.hidden = false;
+    sporocilo = e.message;
   }
+  // vmes je šla že novejša poizvedba: ta odgovor (ali napaka) je zastarel in ne sme ničesar prepisati
+  if (moja !== zadnja) return;
+
+  napaka.textContent = sporocilo;
+  napaka.hidden = !sporocilo;
+  if (sporocilo) {
+    kosi.replaceChildren();
+    return;
+  }
+  napolni(kosi, seznam.map((kos) => vrstica(
+    kos.inventarna_oznaka,
+    kos.naziv,
+    kos.kategorija,
+    znacka(kos.razpolozljivost, RAZPOLOZLJIVOST[kos.razpolozljivost]),
+  )), 'V tej kategoriji ni kosov.');
 }
 
 filter.addEventListener('submit', (dogodek) => {
