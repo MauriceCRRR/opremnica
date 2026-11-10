@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="sl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Moje rezervacije – Opremnica</title>
+  <link rel="stylesheet" href="slog.css">
+</head>
+<body hidden>
+  <header id="glava"></header>
+  <main>
+    <h1>Moje rezervacije</h1>
+    <p class="podnaslov">Tvoje rezervacije in njihovo stanje. Najnovejša je na vrhu.</p>
+
+    <p id="napaka" class="napaka" role="alert" hidden></p>
+
+    <div class="tabela">
+      <table>
+        <thead>
+          <tr><th>Kos</th><th>Termin</th><th>Namen</th><th>Stanje</th><th>Razlog</th><th>Preklic</th></tr>
+        </thead>
+        <tbody id="rezervacije"></tbody>
+      </table>
+    </div>
+    <p class="opomba">Oddano ali odobreno rezervacijo lahko prekličeš, dokler kosa ne prevzameš.</p>
+  </main>
+
+  <dialog id="preklic">
+    <form>
+      <h2>Preklic rezervacije</h2>
+      <dl>
+        <dt>Kos</dt>
+        <dd id="preklicKos"></dd>
+        <dt>Termin</dt>
+        <dd id="preklicTermin"></dd>
+      </dl>
+      <p class="opomba">Termin se sprosti za druge člane. Preklica ni mogoče razveljaviti.</p>
+      <div class="gumbi">
+        <button>Prekliči rezervacijo</button>
+        <button type="button" class="drugi">Zapri</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="moje.js"></script>
+</body>
+</html>
