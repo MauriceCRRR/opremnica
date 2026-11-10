@@ -221,17 +221,41 @@ DoD velja za vse zgodbe. Sprejemni kriteriji zgoraj pa veljajo samo za posamezno
 - Poslovna pravila so preverjena v backendu, ne samo v brskalniku.
 - Če se je spremenilo pravilo, model ali arhitektura, sta posodobljena dokumentacija in ADR.
 
-## Načrtovani sprejemni primeri
+## Sprejemni primeri
 
-To so primeri za poznejšo implementacijo. **Noben test še ni napisan ali izveden.**
+Primeri so bili načrtovani pred implementacijo. Stolpec *Stanje* pove, kateri so že pokriti s samodejnim testom.
 
-| ID | Primer | Pričakovan rezultat | Zgodba |
+| ID | Primer | Pričakovan rezultat | Zgodba | Stanje |
+|---|---|---|---|---|
+| T1 | Prekrivanje: FOTO-02 ima `ODOBRENO` rezervacijo 13.–16. 11., nova rezervacija za 16.–18. 11. | zavrnjeno, nova rezervacija ni shranjena | US-03 | še ni (pride z US-03); isti robni dan je za prikaz razpoložljivosti že preverjen |
+| T2 | Nedovoljen prehod: odobritev rezervacije v stanju `ZAVRNJENA` | napaka, stanje ostane `ZAVRNJENA` | US-04 | še ni |
+| T3 | Brez pravice: član pokliče odobritev | 403, stanje ostane `ODDANA` | US-04 | še ni |
+| T4 | Vračilo že vrnjene rezervacije | napaka, čas vračila se ne spremeni | US-06 | še ni |
+| T5 | Neveljaven datum: datum do pred datumom od ali začetek v preteklosti | zavrnjeno s sporočilom o vzroku | US-02, US-03 | delno: datum do pred datumom od pri iskanju (`oprema.test.js`); začetek v preteklosti pride z US-03 |
+| T6 | Prevzem kosa, ki ga prejšnji član še ni vrnil | zavrnjeno, prikazano, pri kom je kos | US-05 | še ni |
+| T7 | Trajnost: oddaja rezervacije, ponovni zagon strežnika | rezervacija in njeno stanje sta še vedno v bazi | US-03, US-08 | delno: podatki v bazi preživijo ponovni zagon (`baza.test.js`); oddaja pride z US-03 |
+| T8 | Dan vračila: FOTO-02 (termin 13.–16. 11.) je vrnjen 16. 11., nova rezervacija za 16.–18. 11. | shranjeno, ker vrnjena rezervacija ni aktivna | US-03, US-06 | še ni |
+
+## Stanje preverjanja
+
+Stanje po prvem razvojnem sklopu (US-01 in US-02). Samodejni testi so v `backend/test/` in se zaženejo z `npm test`. Trenutno jih je 34 in vsi uspejo. Testi uporabljajo svojo bazo v pomnilniku in nadzorovan današnji dan (sreda, 11. 11. 2026).
+
+| Zgodba | Kriterij | Samodejni test | Opomba |
 |---|---|---|---|
-| T1 | Prekrivanje: FOTO-02 ima `ODOBRENO` rezervacijo 13.–16. 11., nova rezervacija za 16.–18. 11. | zavrnjeno, nova rezervacija ni shranjena | US-03 |
-| T2 | Nedovoljen prehod: odobritev rezervacije v stanju `ZAVRNJENA` | napaka, stanje ostane `ZAVRNJENA` | US-04 |
-| T3 | Brez pravice: član pokliče odobritev | 403, stanje ostane `ODDANA` | US-04 |
-| T4 | Vračilo že vrnjene rezervacije | napaka, čas vračila se ne spremeni | US-06 |
-| T5 | Neveljaven datum: datum do pred datumom od ali začetek v preteklosti | zavrnjeno s sporočilom o vzroku | US-02, US-03 |
-| T6 | Prevzem kosa, ki ga prejšnji član še ni vrnil | zavrnjeno, prikazano, pri kom je kos | US-05 |
-| T7 | Trajnost: oddaja rezervacije, ponovni zagon strežnika | rezervacija in njeno stanje sta še vedno v bazi | US-03, US-08 |
-| T8 | Dan vračila: FOTO-02 (termin 13.–16. 11.) je vrnjen 16. 11., nova rezervacija za 16.–18. 11. | shranjeno, ker vrnjena rezervacija ni aktivna | US-03, US-06 |
+| US-01 | 1 prijava aktivnega računa | `prijava.test.js`: prijava vseh treh vlog, piškotek seje | na začetni zaslon vloge preusmeri frontend |
+| US-01 | 2 napačen e-naslov ali geslo | `prijava.test.js`: popolnoma enak odgovor v obeh primerih | |
+| US-01 | 3 deaktiviran račun | `prijava.test.js`: zavrnjen tudi s pravilnim geslom | |
+| US-01 | 4 neprijavljen uporabnik | `prijava.test.js`: vsak zaščiten klic vrne 401 | na prijavo preusmeri frontend (`skupno.js`); zanj ni samodejnega testa |
+| US-01 | 5 odjava | `prijava.test.js`: po odjavi 401, star piškotek ne velja | |
+| US-01 | dostop po vlogi | `prijava.test.js`: 403 za napačno vlogo, deaktivacija in sprememba vloge primeta takoj | |
+| US-02 | 1 seznam neodpisanih kosov | `oprema.test.js`: polja, odpisan kos manjka, filter po kategoriji | |
+| US-02 | 2 kdaj je kos prost | `oprema.test.js`: robni dnevi termina, aktivna in neaktivna stanja, kos v popravilu | |
+| US-02 | 3 brez imen članov | `oprema.test.js`: odgovor nima podatkov o članu, niti za skrbnika | |
+| US-02 | 4 datum do pred datumom od | `oprema.test.js`: 400 s sporočilom; tudi manjkajoč ali neobstoječ datum | |
+| US-02 | 5 gumb *Rezerviraj* | – | še ni narejen; pride skupaj z oddajo rezervacije (US-03) |
+
+Poleg tega `datumi.test.js` preveri današnji dan po ljubljanskem času (tudi ob prehodu na zimski čas) in veljavnost datumov, `baza.test.js` začetne podatke, omejitve v bazi in trajnost, `frontend.test.js` pa, da frontend streže isti strežnik.
+
+Frontend nima samodejnih testov v brskalniku. Glavna pot (napačno geslo, začetni zasloni vseh treh vlog, filter po kategoriji in terminu, sporočilo ob obrnjenih datumih, odjava) je bila 10. 11. 2026 pregledana v brskalniku.
+
+US-03 do US-06 še niso implementirane in zato še niso preverjene.
