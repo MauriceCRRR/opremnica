@@ -66,7 +66,7 @@ export function ustvariApp({ baza, skrivnost, zdaj = () => new Date() }) {
   });
 
   app.use('/api', opremaPoti(baza));
-  app.use('/api', rezervacijePoti(baza));
+  app.use('/api', rezervacijePoti(baza, zdaj));
   app.use('/api', uporabnikiPoti(baza));
   app.use('/api', (req, res) => res.status(404).json({ napaka: 'Ta pot ne obstaja' }));
 

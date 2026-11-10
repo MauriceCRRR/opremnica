@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { danes, jeDatum, lokalniCas, pristejDni } from '../src/datumi.js';
+import { danes, jeDatum, lokalniCas, pristejDni, razlikaDni } from '../src/datumi.js';
 
 test('danes je koledarski dan v Ljubljani, ne v UTC', () => {
   // pozimi (UTC+1): 23:30 UTC je v Ljubljani že naslednji dan
@@ -38,4 +38,13 @@ test('pristejDni šteje koledarske dni čez konec meseca, leta in premik ure', (
   assert.equal(pristejDni('2026-10-24', 2), '2026-10-26'); // vmes je dan s 25 urami
   assert.equal(pristejDni('2027-03-27', 2), '2027-03-29'); // vmes je dan s 23 urami
   assert.equal(pristejDni('2026-11-11', 60), '2027-01-10');
+});
+
+test('razlikaDni šteje cele koledarske dni, tudi čez premik ure', () => {
+  assert.equal(razlikaDni('2026-11-13', '2026-11-13'), 0);
+  assert.equal(razlikaDni('2026-11-13', '2026-11-16'), 3);
+  assert.equal(razlikaDni('2026-11-16', '2026-11-13'), -3);
+  assert.equal(razlikaDni('2026-10-24', '2026-10-26'), 2); // vmes je dan s 25 urami
+  assert.equal(razlikaDni('2027-03-27', '2027-03-29'), 2); // vmes je dan s 23 urami
+  assert.equal(razlikaDni('2026-11-11', '2027-01-10'), 60);
 });

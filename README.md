@@ -6,14 +6,14 @@ Projekt pri predmetu Razvoj informacijskih rešitev in storitev (RIRS), UM FERI,
 
 ## Stanje
 
-Aplikacija je v razvoju in jo je že mogoče lokalno zagnati. MVP obsega zgodbe US-01 do US-06 ([05 – Uporabniške zgodbe](docs/05-uporabniske-zgodbe.md)). Narejen je prvi sklop:
+Aplikacija je v razvoju in jo je že mogoče lokalno zagnati. MVP obsega zgodbe US-01 do US-06 ([05 – Uporabniške zgodbe](docs/05-uporabniske-zgodbe.md)). Narejena sta prva dva sklopa od treh:
 
 | Zgodba | Stanje |
 |---|---|
 | US-01 Prijava in dostop po vlogi | narejeno |
-| US-02 Pregled opreme in razpoložljivosti | narejeno, razen gumba *Rezerviraj* (kriterij 5), ki pride skupaj z US-03 |
-| US-03 Oddaja rezervacije s preverjanjem prekrivanja | še ni |
-| US-04 Odobritev ali zavrnitev rezervacije | še ni |
+| US-02 Pregled opreme in razpoložljivosti | narejeno |
+| US-03 Oddaja rezervacije s preverjanjem prekrivanja | narejeno |
+| US-04 Odobritev ali zavrnitev rezervacije | narejeno |
 | US-05 Evidentiranje prevzema | še ni |
 | US-06 Evidentiranje vračila in stanja kosa | še ni |
 
@@ -21,10 +21,12 @@ Kaj trenutno deluje:
 
 - prijava in odjava; član pride na *Oprema*, skrbnik na *Rezervacije*, administrator na *Uporabniki*,
 - pregled opreme s filtrom po kategoriji in terminu ter razpoložljivostjo »Prost«, »Zaseden v terminu« ali »V popravilu«,
-- skrbnik vidi seznam aktivnih rezervacij, zaenkrat samo za branje (odobritev, prevzem in vračilo so US-04 do US-06),
+- pri prostem kosu gumb *Rezerviraj*: rezervacija za prikazani termin se shrani kot ODDANA in termin takoj zadrži. Termin se lahko začne od danes do 60 dni vnaprej in traja največ 14 dni; prekrivanje z drugo aktivno rezervacijo istega kosa sistem zavrne. Zase lahko rezervirajo vse tri vloge,
+- *Moje rezervacije*: lastne rezervacije s stanjem in razlogom zavrnitve; oddano ali odobreno rezervacijo lahko lastnik prekliče,
+- skrbnik v seznamu *Čakajoče* (od najstarejše) rezervacijo odobri ali z obveznim razlogom zavrne; zapišeta se skrbnik in čas. Odobrene in prevzete rezervacije so zaenkrat samo za branje (prevzem in vračilo sta US-05 in US-06),
 - administrator vidi seznam računov, samo za branje. Računi se naložijo z začetnimi podatki; upravljanje računov (US-10) ni del MVP.
 
-Zgodbe US-07 do US-12 niso del MVP.
+Zgodbe US-07 do US-12 niso del MVP. Iz njih je narejeno samo tisto, kar MVP potrebuje: seznam lastnih rezervacij (del US-08) in preklic lastne rezervacije pred prevzemom (del US-07). Izbira aktivne/pretekle, opozorilo o zamudi in skrbnikov preklic z razlogom še niso narejeni.
 
 Razvojne naloge so na GitHub Project boardu: <https://github.com/users/MauriceCRRR/projects/5>
 
@@ -78,7 +80,7 @@ cd backend
 npm test
 ```
 
-Trenutno je 34 testov (`node:test` in `supertest`). Preverjajo API proti sprejemnim kriterijem US-01 in US-02, začetne podatke, datume po ljubljanskem času in trajnost baze. Vsak test dobi svojo bazo v pomnilniku in nadzorovan današnji dan, zato se lokalne baze ne dotakne. Katere kriterije pokriva kateri test, je v [05 – Uporabniške zgodbe](docs/05-uporabniske-zgodbe.md#stanje-preverjanja).
+Trenutno je 65 testov (`node:test` in `supertest`). Preverjajo API proti sprejemnim kriterijem US-01 do US-04 (tudi robne dneve termina, natanko 14 in 60 dni, hkratni oddaji in ponovljene odločitve), začetne podatke, datume po ljubljanskem času in trajnost baze. Vsak test dobi svojo bazo v pomnilniku in nadzorovan današnji dan, zato se lokalne baze ne dotakne. Katere kriterije pokriva kateri test, je v [05 – Uporabniške zgodbe](docs/05-uporabniske-zgodbe.md#stanje-preverjanja).
 
 ## Tehnologije
 

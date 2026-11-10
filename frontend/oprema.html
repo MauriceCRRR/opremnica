@@ -28,17 +28,44 @@
     </form>
 
     <p id="napaka" class="napaka" role="alert" hidden></p>
+    <p id="uspeh" class="uspeh" role="status" hidden>
+      Rezervacija je oddana in čaka na odobritev skrbnika: <strong id="oddano"></strong>.
+      Najdeš jo v <a href="/moje.html">Mojih rezervacijah</a>.
+    </p>
 
     <div class="tabela">
       <table>
+        <caption id="prikazano"></caption>
         <thead>
-          <tr><th>Oznaka</th><th>Naziv</th><th>Kategorija</th><th>V izbranem terminu</th></tr>
+          <tr><th>Oznaka</th><th>Naziv</th><th>Kategorija</th><th>V izbranem terminu</th><th>Rezervacija</th></tr>
         </thead>
         <tbody id="kosi"></tbody>
       </table>
     </div>
     <p class="opomba">Prikazani so vsi kosi razen odpisanih. Kdo je rezerviral zaseden kos, ni prikazano.</p>
   </main>
+
+  <dialog id="rezervacija">
+    <form>
+      <h2>Nova rezervacija</h2>
+      <dl>
+        <dt>Kos</dt>
+        <dd id="izbranKos"></dd>
+        <dt>Termin</dt>
+        <dd id="izbranTermin"></dd>
+      </dl>
+      <label>Namen (neobvezno)
+        <input name="namen" maxlength="200">
+      </label>
+      <p class="opomba">Največ 14 dni, začetek največ 60 dni vnaprej. Po oddaji je rezervacija ODDANA in čaka na odobritev skrbnika.</p>
+      <p class="napaka" role="alert" hidden></p>
+      <div class="gumbi">
+        <button>Oddaj rezervacijo</button>
+        <button type="button" class="drugi">Zapri</button>
+      </div>
+    </form>
+  </dialog>
+
   <script type="module" src="oprema.js"></script>
 </body>
 </html>

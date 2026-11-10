@@ -9,6 +9,7 @@ const MENI = [
   { naslov: 'Rezervacije', stran: '/rezervacije.html', vloga: 'SKRBNIK' },
   { naslov: 'Uporabniki', stran: '/uporabniki.html', vloga: 'ADMIN' },
   { naslov: 'Oprema', stran: '/oprema.html' },
+  { naslov: 'Moje rezervacije', stran: '/moje.html' },
 ];
 
 // naredi element: el('a', { href: '/' }, 'besedilo ali drugi elementi')
@@ -37,6 +38,50 @@ export function napolni(telo, vrstice, prazno) {
 export function lepDatum(datum) {
   const [leto, mesec, dan] = datum.split('-').map(Number);
   return `${dan}. ${mesec}. ${leto}`;
+}
+
+// '2026-11-13T17:05:00' -> '13. 11. 2026 17:05'
+export function lepCas(cas) {
+  return `${lepDatum(cas.slice(0, 10))} ${cas.slice(11, 16)}`;
+}
+
+// termin z obema dnevoma: '13. 11. 2026 – 16. 11. 2026'
+export function lepTermin(od, datumDo) {
+  return od === datumDo ? lepDatum(od) : `${lepDatum(od)} – ${lepDatum(datumDo)}`;
+}
+
+// besedilo v element; prazno besedilo ga skrije
+export function pokazi(element, besedilo) {
+  element.textContent = besedilo;
+  element.hidden = !besedilo;
+}
+
+// gumb z dejanjem; med izvajanjem je onemogočen, da dvojni klik ne pošlje dveh zahtev
+export function gumb(besedilo, dejanje, razred = '') {
+  const g = el('button', { type: 'button', className: razred }, besedilo);
+  g.addEventListener('click', async () => {
+    g.disabled = true;
+    try {
+      await dejanje();
+    } finally {
+      g.disabled = false;
+    }
+  });
+  return g;
+}
+
+// oddaja obrazca brez ponovnega nalaganja strani; tudi tu je gumb med čakanjem onemogočen
+export function obOddaji(obrazec, dejanje) {
+  obrazec.addEventListener('submit', async (dogodek) => {
+    dogodek.preventDefault();
+    const g = obrazec.querySelector('button:not([type=button])');
+    g.disabled = true;
+    try {
+      await dejanje();
+    } finally {
+      g.disabled = false;
+    }
+  });
 }
 
 // Klic API: brez telesa GET, s telesom POST. Ob napaki vrže sporočilo strežnika.

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AKTIVNA } from './baza.js';
-import { jeDatum } from './datumi.js';
+import { napakaTermina } from './datumi.js';
 
 export function opremaPoti(baza) {
   const poti = Router();
@@ -14,12 +14,8 @@ export function opremaPoti(baza) {
   poti.get('/oprema', (req, res) => {
     const { od, do: datumDo } = req.query;
     const kategorija = req.query.kategorija ? Number(req.query.kategorija) : null; // brez = vse
-    if (!jeDatum(od) || !jeDatum(datumDo)) {
-      return res.status(400).json({ napaka: 'Vnesi veljavna datuma od in do' });
-    }
-    if (datumDo < od) {
-      return res.status(400).json({ napaka: 'Datum do ne sme biti pred datumom od' });
-    }
+    const napaka = napakaTermina(od, datumDo);
+    if (napaka) return res.status(400).json({ napaka });
     if (kategorija !== null && !Number.isInteger(kategorija)) {
       return res.status(400).json({ napaka: 'Neveljavna kategorija' });
     }
