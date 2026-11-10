@@ -110,5 +110,31 @@ export function rezervacijePoti(baza, zdaj) {
     res.json({ stanje: 'PREKLICANA' });
   });
 
+  // Skrbnikova odločitev o čakajoči rezervaciji. Pogoj stanje = 'ODDANA' je v samem UPDATE,
+  // zato ponovljena ali zakasnela odločitev ne spremeni ničesar. Zapišeta se skrbnik in čas.
+  function odloci(req, res, stanje, razlog) {
+    const id = idIz(req);
+    const { changes } = baza.prepare(`
+      UPDATE rezervacija SET stanje = ?, razlog = ?, odlocil_id = ?, odloceno_ob = ?
+      WHERE id = ? AND stanje = 'ODDANA'
+    `).run(stanje, razlog, req.uporabnik.id, lokalniCas(zdaj()), id);
+    if (changes) return res.json({ stanje });
+
+    const obstaja = baza.prepare('SELECT 1 FROM rezervacija WHERE id = ?').get(id);
+    if (!obstaja) return res.status(404).json({ napaka: 'Rezervacija ne obstaja' });
+    res.status(409).json({ napaka: 'Rezervacija ni več v stanju ODDANA' });
+  }
+
+  poti.post('/rezervacije/:id/odobritev', samo('SKRBNIK'), (req, res) => {
+    odloci(req, res, 'ODOBRENA', null);
+  });
+
+  poti.post('/rezervacije/:id/zavrnitev', samo('SKRBNIK'), (req, res) => {
+    const razlog = String(req.body?.razlog ?? '').trim();
+    if (!razlog) return res.status(400).json({ napaka: 'Razlog zavrnitve je obvezen' });
+    if (razlog.length > 300) return res.status(400).json({ napaka: 'Razlog je predolg (največ 300 znakov)' });
+    odloci(req, res, 'ZAVRNJENA', razlog);
+  });
+
   return poti;
 }
