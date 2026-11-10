@@ -1,6 +1,6 @@
 # 04 – Arhitektura in tehnološki sklad
 
-> **Stanje:** arhitektura je postavljena in aplikacijo je mogoče lokalno zagnati. Izvedena sta prva dva sklopa MVP: prijava in dostop po vlogi (US-01), pregled opreme in razpoložljivosti (US-02), oddaja rezervacije (US-03) ter odobritev ali zavrnitev (US-04). Prevzem in vračilo (US-05 in US-06) sta še **načrtovana**. Pri posameznih delih spodaj je označeno, kaj je izvedeno.
+> **Stanje:** arhitektura je postavljena in aplikacijo je mogoče lokalno zagnati. Izveden je celoten MVP, zgodbe US-01 do US-06: prijava in dostop po vlogi, pregled opreme in razpoložljivosti, oddaja rezervacije, odobritev ali zavrnitev, prevzem in vračilo. Zgodbe US-07 do US-12 so še **načrtovane**; iz US-07 in US-08 je narejen samo del, ki ga MVP potrebuje. Pri posameznih delih spodaj je označeno, kaj je izvedeno.
 
 ## Glavni deli sistema
 
@@ -36,11 +36,11 @@ Glavne poti API:
 | `GET /api/oprema?od=&do=&kategorija=` | prijavljeni | razpoložljivost v terminu (F02) | izvedeno |
 | `GET /api/kategorije` | prijavljeni | kategorije za filter (F02) | izvedeno |
 | `POST /api/rezervacije` | prijavljeni | oddaja rezervacije (F03) | izvedeno |
-| `GET /api/rezervacije/moje` | prijavljeni | moje rezervacije (F08) | izvedeno kot podpora MVP: lasten seznam s stanjem in razlogom |
-| `POST /api/rezervacije/:id/preklic` | lastnik, skrbnik | preklic (F07) | delno: lastnik prekliče svojo rezervacijo pred prevzemom; skrbnikov preklic z razlogom še ni narejen |
-| `GET /api/rezervacije` | skrbnik | seznami za obdelavo in zamude (F04–F06, F11) | izvedeno za F04: vse aktivne rezervacije, čakajoče od najstarejše; zaslon jih razdeli po stanju |
+| `GET /api/rezervacije/moje` | prijavljeni | moje rezervacije (F08) | izvedeno kot podpora MVP: lasten seznam s stanjem, razlogom in zamudo |
+| `POST /api/rezervacije/:id/preklic` | lastnik, skrbnik | preklic (F07) | izvedeno kot podpora MVP: lastnik svojo oddano ali odobreno, skrbnik tujo odobreno z razlogom |
+| `GET /api/rezervacije` | skrbnik | seznami za obdelavo in zamude (F04–F06, F11) | izvedeno za F04–F06: vse aktivne rezervacije z oznako »za prevzem«, stanjem kosa in dnevi zamude; zaslon jih razdeli v sezname. Ločenega seznama zamud (F11) ni |
 | `POST /api/rezervacije/:id/odobritev`, `/zavrnitev` | skrbnik | odločitev o čakajoči rezervaciji (F04) | izvedeno |
-| `POST /api/rezervacije/:id/prevzem`, `/vracilo` | skrbnik | prevzem in vračilo (F05, F06) | načrtovano |
+| `POST /api/rezervacije/:id/prevzem`, `/vracilo` | skrbnik | prevzem in vračilo (F05, F06) | izvedeno |
 | `GET/POST/PUT /api/kosi`, `POST/PUT /api/kategorije`, `GET /api/kosi/:id/zgodovina` | skrbnik | oprema in zgodovina (F09, F12) | ni del MVP |
 | `GET/POST/PUT /api/uporabniki` | administrator | uporabniki in vloge (F10) | delno: samo seznam računov; urejanje ni del MVP |
 
@@ -70,6 +70,11 @@ Manjše odločitve, sprejete med izvedbo. Sklada in ADR ne spreminjajo.
 - **Prehodi stanj** so en sam stavek `UPDATE` s pogojem na trenutno stanje. Ponovljena ali zakasnela odločitev zato ne spremeni ničesar in dobi sporočilo »Rezervacija ni več v stanju ODDANA«.
 - **Skrbnik sme odločiti o lastni rezervaciji** (delovna predpostavka P7); zapisano je, kdo je odločil. Vprašanje OPEN-2 naročniku ostaja odprto.
 - **Zaslon Oprema** rezervira termin, za katerega je bil seznam izračunan, ne tistega, ki je trenutno vpisan v filter. Seznam se preračuna ob vsaki spremembi filtra.
+- **Prevzem in vračilo** preverita pogoje in zapišeta spremembo v eni transakciji. Pri vračilu s poškodbo se rezervacija in stanje kosa spremenita skupaj.
+- **Seznam Za prevzem** vsebuje tudi odobrene rezervacije, ki jim je termin že minil. Prevzem takih sistem zavrne; skrbnik jih prekliče z razlogom, ker samodejnega preklica ni (P6).
+- **Zamuda** se računa iz datuma do in dneva vračila (ali današnjega dne) po ljubljanskem koledarju. V bazi ni stolpca zanjo.
+- **Prizadete rezervacije** po poškodbi so še neizpeljane rezervacije istega kosa (`ODDANA`, `ODOBRENA`), ki se še niso končale. Vrne jih odgovor na vračilo; pri njih na skrbnikovih seznamih piše, da je kos v popravilu.
+- **Skrbnikov preklic** velja samo za odobrene rezervacije in zahteva razlog; oddano rezervacijo skrbnik zavrne. Kdo je evidentiral prevzem, vračilo ali preklic, se ne hrani (dokument 03).
 - **Začetni podatki** se v polno bazo ne vpišejo; ponastavitev je treba zahtevati izrecno (`npm run seed -- --ponastavi`).
 - **Testi** uporabljajo svojo bazo v pomnilniku in nadzorovan današnji dan, zato primeri z datumi ne zastarajo.
 
@@ -93,12 +98,12 @@ Skrivnost za podpisovanje sej (`SESSION_SECRET`) je v datoteki `backend/.env`, k
 
 | Del | Tehnologija | Stanje |
 |---|---|---|
-| Frontend | HTML, CSS, JavaScript brez ogrodja, `fetch` | izvedeno za US-01 do US-04 |
-| Backend | Node.js (LTS), Express 5, REST API z JSON | izvedeno za US-01 do US-04 |
+| Frontend | HTML, CSS, JavaScript brez ogrodja, `fetch` | izvedeno za MVP (US-01 do US-06) |
+| Backend | Node.js (LTS), Express 5, REST API z JSON | izvedeno za MVP (US-01 do US-06) |
 | Podatkovna baza | SQLite, knjižnica `better-sqlite3` | izvedeno (vse štiri tabele) |
 | Avtentikacija | `express-session` (piškotek seje), `scrypt` iz `node:crypto` | izvedeno |
 | Lokalni razvoj | Node.js in npm, urejevalnik kode, brskalnik | vzpostavljeno |
-| Testiranje | vgrajeni `node:test` in `supertest` za klice API | izvedeno za US-01 do US-04 (65 testov) |
+| Testiranje | vgrajeni `node:test` in `supertest` za klice API | izvedeno za MVP (90 testov) |
 | Različice in proces | Git, GitHub, GitHub Flow, zaščitena veja `main` | vzpostavljeno |
 | Dokumentacija | Markdown, Mermaid, PNG wireframi | vzpostavljeno |
 
